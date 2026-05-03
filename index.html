@@ -480,6 +480,10 @@ async function loadProducts() {
     const allRows = table.rows.map(r =>
       r.c ? r.c.map(cell => cell ? (cell.f != null ? cell.f : (cell.v != null ? cell.v : '')) : '') : []
     );
+    // 数値列用に生の値（cell.v）を取得
+    const rawRows = table.rows.map(r =>
+      r.c ? r.c.map(cell => cell ? (cell.v != null ? cell.v : '') : '') : []
+    );
 
     let headerIdx = -1;
     for (let i = 0; i < allRows.length; i++) {
@@ -501,9 +505,11 @@ async function loadProducts() {
       headers.forEach((h, j) => { if (h) product[h] = row[j] !== undefined ? row[j] : ''; });
       // Position-based overrides for known columns (0-indexed)
       const KNOWN_COLS = { '仕入日': 3, '出品日': 4, '売却日': 5, '管理番号': 6, '仕入値': 11, '販売価格': 14, '手数料': 15, '送料': 16 };
+      const NUM_COLS = new Set(['仕入値','販売価格','手数料','送料','管理番号']);
+      const rawRow = rawRows[i];
       Object.entries(KNOWN_COLS).forEach(([name, colIdx]) => {
-        const v = row[colIdx];
-        product[name] = (v !== undefined && v !== null) ? String(v) : '';
+        const v = NUM_COLS.has(name) ? rawRow[colIdx] : row[colIdx];
+        product[name] = (v !== undefined && v !== null && v !== '') ? String(v) : '';
       });
       productData.push(product);
     }

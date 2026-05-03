@@ -281,6 +281,9 @@
     <div class="field-label">売却日</div>
     <input class="field-input" id="editSoldDate" type="date">
 
+    <div class="field-label">粗利（自動計算）</div>
+    <div class="field-input" id="editGrossProfit" style="background:#f2f2f7;color:#1c1c1e;display:flex;align-items:center;">—</div>
+
     <div class="field-label">備考</div>
     <input class="field-input" id="editMemo" type="text" placeholder="メモを入力...">
 
@@ -504,8 +507,8 @@ async function loadProducts() {
       const product = { _row: i + 1 };
       headers.forEach((h, j) => { if (h) product[h] = row[j] !== undefined ? row[j] : ''; });
       // Position-based overrides for known columns (0-indexed)
-      const KNOWN_COLS = { '仕入日': 3, '出品日': 4, '売却日': 5, '管理番号': 6, '仕入値': 11, '販売価格': 14, '手数料': 18, '送料': 16 };
-      const NUM_COLS = new Set(['仕入値','販売価格','手数料','送料','管理番号']);
+      const KNOWN_COLS = { '仕入日': 3, '出品日': 4, '売却日': 5, '管理番号': 6, '仕入値': 11, '販売価格': 14, '手数料': 18, '送料': 16, '粗利': 19 };
+      const NUM_COLS = new Set(['仕入値','販売価格','手数料','送料','管理番号','粗利']);
       const rawRow = rawRows[i];
       Object.entries(KNOWN_COLS).forEach(([name, colIdx]) => {
         const v = NUM_COLS.has(name) ? rawRow[colIdx] : row[colIdx];
@@ -578,10 +581,10 @@ function renderProducts(list) {
     const cat    = col(p,'カテゴリ');
     const price  = col(p,'販売価格','仕入値','仕入点数');
     const days   = col(p,'経過日数');
-    const profit = col(p,'利益率');
-    const pn     = parseFloat(profit);
-    const profitClass = isNaN(pn) ? '' : (pn >= 0 ? 'profit-pos' : 'profit-neg');
-    const profitTxt = isNaN(pn) ? '' : (pn < 2 ? (pn*100).toFixed(1) : pn.toFixed(1)) + '%';
+    const gp     = col(p,'粗利');
+    const gpNum  = parseFloat(gp);
+    const gpClass = isNaN(gpNum) ? '' : (gpNum >= 0 ? 'profit-pos' : 'profit-neg');
+    const gpTxt  = isNaN(gpNum) ? '' : '粗利 ¥' + gpNum.toLocaleString();
     return `
       <div class="product-card" onclick="openProductEdit(${p._row})">
         <div class="product-body">
@@ -594,7 +597,7 @@ function renderProducts(list) {
         <div class="product-right">
           ${price ? `<div class="product-price">${fmt(price)}</div>` : ''}
           ${days ? `<div class="product-days">${days}日経過</div>` : ''}
-          ${profitTxt ? `<div class="product-profit ${profitClass}">${profitTxt}</div>` : ''}
+          ${gpTxt ? `<div class="product-profit ${gpClass}">${gpTxt}</div>` : ''}
         </div>
       </div>`;
   }).join('');
@@ -658,6 +661,8 @@ function openProductEdit(rowNum) {
   document.getElementById('editListDate').value   = toInputDate(col(p,'出品日'));
   document.getElementById('editSoldDate').value   = toInputDate(col(p,'売却日'));
   document.getElementById('editMemo').value       = col(p,'備考') || '';
+  const gp = col(p,'粗利');
+  document.getElementById('editGrossProfit').textContent = gp ? '¥' + Number(gp).toLocaleString() : '—';
 
   const cur = col(p,'出品状況');
   document.getElementById('statusGrid').innerHTML = STATUS_LIST.map(s =>

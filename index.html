@@ -455,7 +455,7 @@ async function saveSummary() {
   try {
     await fetch(GAS_URL, {
       method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'application/json'},
+      headers:{'Content-Type':'text/plain'},
       body: JSON.stringify({ metric:sEditState.metric, monthIdx:currentMonthIdx, value:val })
     });
     if (summaryData[sEditState.metric]) summaryData[sEditState.metric][currentMonthIdx] = Number(val);

@@ -114,6 +114,7 @@
     .badge.status-検品済{background:#e3f2fd;color:#1565c0;}
     .badge.status-出品中{background:#e8f5e9;color:#2e7d32;}
     .badge.status-売れた{background:#fce4ec;color:#c62828;}
+    .badge.status-売却済{background:#fce4ec;color:#c62828;}
     .badge.status-リペア{background:#fff3e0;color:#e65100;}
     .badge.status-未出品{background:#f3e5f5;color:#6a1b9a;}
     .badge.cat{background:#f2f2f7;color:#636366;}
@@ -254,7 +255,7 @@
 
 <script>
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwksuXgHQOQl92vs5i-xoN3VyqOlCyZhEaLFV-f7ubqRtyMNS-cMjeSwyPM-W2m2aN7/exec';
-const STATUS_LIST = ['検品済','出品中','売れた','リペア','未出品','廃棄'];
+const STATUS_LIST = ['検品済','出品中','売却済','売れた','リペア','未出品','廃棄'];
 const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
 let summaryData = null;
@@ -482,11 +483,18 @@ function filterProducts() {
   const filtered = productData.filter(p => {
     const name = String(col(p,'商品名')).toLowerCase();
     const matchQ = !q || name.includes(q);
-    const status = String(col(p,'出品状況'));
+    const status = derivedStatus(p);
     const matchF = activeFilter === '全て' || status === activeFilter;
     return matchQ && matchF;
   });
   renderProducts(filtered);
+}
+
+function derivedStatus(p) {
+  // 売出日が入っていれば売却済
+  const soldDate = col(p,'売出日','売れた日','売却日');
+  if (soldDate && String(soldDate).trim() !== '') return '売却済';
+  return col(p,'出品状況') || '';
 }
 
 function renderProducts(list) {
@@ -498,7 +506,7 @@ function renderProducts(list) {
   div.innerHTML = list.map(p => {
     const name   = col(p,'商品名') || '（商品名なし）';
     const num    = col(p,'管理番号');
-    const status = col(p,'出品状況');
+    const status = derivedStatus(p);
     const cat    = col(p,'カテゴリ');
     const price  = col(p,'販売価格','仕入値','仕入点数');
     const days   = col(p,'経過日数');
@@ -508,9 +516,8 @@ function renderProducts(list) {
     const profitTxt = isNaN(pn) ? '' : (pn < 2 ? (pn*100).toFixed(1) : pn.toFixed(1)) + '%';
     return `
       <div class="product-card" onclick="openProductEdit(${p._row})">
-        ${num ? `<div class="product-num">${num}</div>` : ''}
         <div class="product-body">
-          <div class="product-name">${name}</div>
+          <div class="product-name">${num ? `<span style="color:#8e8e93;font-weight:600;margin-right:6px">#${num}</span>` : ''}${name}</div>
           <div class="product-meta">
             ${status ? `<span class="badge status-${status}">${status}</span>` : ''}
             ${cat ? `<span class="badge cat">${cat}</span>` : ''}

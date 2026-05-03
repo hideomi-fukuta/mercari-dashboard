@@ -693,24 +693,9 @@ async function saveProduct() {
   const btn = document.getElementById('saveProductBtn');
   btn.disabled = true; btn.textContent = '保存中...';
 
-  const updates = [];
-  if (nameVal !== String(col(p,'商品名'))) updates.push({ field:'商品名', value:nameVal });
-  if (status && status !== col(p,'出品状況')) updates.push({ field:actualCol(p,'出品状況'), value:status });
-  if (shiire !== '' && shiire !== String(col(p,'仕入値','仕入れ値','仕入点数'))) updates.push({ field:actualCol(p,'仕入値','仕入れ値','仕入点数'), value:Number(shiire) });
-  if (price !== '' && price !== String(col(p,'販売価格'))) updates.push({ field:actualCol(p,'販売価格'), value:Number(price) });
-  if (sakiVal !== String(col(p,'仕入先','仕入れ先'))) updates.push({ field:actualCol(p,'仕入先','仕入れ先'), value:sakiVal });
-  if (fee !== '' && fee !== String(col(p,'手数料','手数料額'))) updates.push({ field:actualCol(p,'手数料','手数料額'), value:Number(fee) });
-  if (shipping !== '' && shipping !== String(col(p,'送料'))) updates.push({ field:actualCol(p,'送料'), value:Number(shipping) });
-  if (shiireD !== String(col(p,'仕入日'))) updates.push({ field:actualCol(p,'仕入日'), value:shiireD });
-  if (listD !== String(col(p,'出品日'))) updates.push({ field:actualCol(p,'出品日'), value:listD });
-  if (soldD !== String(col(p,'売却日'))) updates.push({ field:'売却日', value:soldD });
-  if (memo !== String(col(p,'備考'))) updates.push({ field:actualCol(p,'備考'), value:memo });
-
   try {
     if (isNewProduct) {
-      // 新規登録
       const fields = {};
-      const status = document.querySelector('.status-opt.selected')?.textContent || '検品済';
       if (nameVal)  fields['商品名']   = nameVal;
       if (status)   fields['出品状況'] = status;
       if (shiire)   fields['仕入値']   = Number(shiire);
@@ -724,7 +709,7 @@ async function saveProduct() {
       if (memo)     fields['備考']     = memo;
       await fetch(GAS_URL, {
         method:'POST', mode:'no-cors',
-        headers:{'Content-Type':'application/json'},
+        headers:{'Content-Type':'text/plain'},
         body: JSON.stringify({ action:'addProduct', fields })
       });
       document.getElementById('editOverlay').classList.remove('open');
@@ -732,11 +717,22 @@ async function saveProduct() {
       productData = null;
       loadProducts();
     } else {
-      // 既存更新
+      const updates = [];
+      if (nameVal !== String(col(p,'商品名'))) updates.push({ field:'商品名', value:nameVal });
+      if (status && status !== col(p,'出品状況')) updates.push({ field:actualCol(p,'出品状況'), value:status });
+      if (shiire !== '' && shiire !== String(col(p,'仕入値','仕入れ値','仕入点数'))) updates.push({ field:actualCol(p,'仕入値','仕入れ値','仕入点数'), value:Number(shiire) });
+      if (price !== '' && price !== String(col(p,'販売価格'))) updates.push({ field:actualCol(p,'販売価格'), value:Number(price) });
+      if (sakiVal !== String(col(p,'仕入先','仕入れ先'))) updates.push({ field:actualCol(p,'仕入先','仕入れ先'), value:sakiVal });
+      if (fee !== '' && fee !== String(col(p,'手数料','手数料額'))) updates.push({ field:actualCol(p,'手数料','手数料額'), value:Number(fee) });
+      if (shipping !== '' && shipping !== String(col(p,'送料'))) updates.push({ field:actualCol(p,'送料'), value:Number(shipping) });
+      if (shiireD !== String(col(p,'仕入日'))) updates.push({ field:'仕入日', value:shiireD });
+      if (listD !== String(col(p,'出品日'))) updates.push({ field:'出品日', value:listD });
+      if (soldD !== String(col(p,'売却日'))) updates.push({ field:'売却日', value:soldD });
+      if (memo !== String(col(p,'備考'))) updates.push({ field:actualCol(p,'備考'), value:memo });
       for (const u of updates) {
         await fetch(GAS_URL, {
           method:'POST', mode:'no-cors',
-          headers:{'Content-Type':'application/json'},
+          headers:{'Content-Type':'text/plain'},
           body: JSON.stringify({ action:'updateProduct', row:p._row, headerRow:headerRow, field:u.field, value:u.value })
         });
         p[u.field] = u.value;

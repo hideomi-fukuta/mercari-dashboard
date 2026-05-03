@@ -497,6 +497,12 @@ async function loadProducts() {
       if (!row[nameIdx] && !row[numIdx]) continue;
       const product = { _row: i + 1 };
       headers.forEach((h, j) => { if (h) product[h] = row[j] !== undefined ? row[j] : ''; });
+      // Position-based overrides for known columns (0-indexed)
+      const KNOWN_COLS = { '仕入日': 3, '出品日': 4, '売却日': 5, '管理番号': 6, '販売価格': 14, '手数料': 15, '送料': 16 };
+      Object.entries(KNOWN_COLS).forEach(([name, colIdx]) => {
+        const v = row[colIdx];
+        product[name] = (v !== undefined && v !== null) ? String(v) : '';
+      });
       productData.push(product);
     }
 

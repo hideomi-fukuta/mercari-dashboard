@@ -504,7 +504,7 @@ async function loadProducts() {
       const product = { _row: i + 1 };
       headers.forEach((h, j) => { if (h) product[h] = row[j] !== undefined ? row[j] : ''; });
       // Position-based overrides for known columns (0-indexed)
-      const KNOWN_COLS = { '仕入日': 3, '出品日': 4, '売却日': 5, '管理番号': 6, '仕入値': 11, '販売価格': 14, '手数料': 15, '送料': 16 };
+      const KNOWN_COLS = { '仕入日': 3, '出品日': 4, '売却日': 5, '管理番号': 6, '仕入値': 11, '販売価格': 14, '手数料': 18, '送料': 16 };
       const NUM_COLS = new Set(['仕入値','販売価格','手数料','送料','管理番号']);
       const rawRow = rawRows[i];
       Object.entries(KNOWN_COLS).forEach(([name, colIdx]) => {
@@ -685,7 +685,7 @@ function actualCol(p, ...names) {
 }
 
 // D=3,E=4,F=5,G=6,O=14,P=15,Q=16 (0-indexed)
-const FIELD_COL = { '仕入日':3, '出品日':4, '売却日':5, '管理番号':6, '仕入値':11, '販売価格':14, '手数料':15, '送料':16 };
+const FIELD_COL = { '仕入日':3, '出品日':4, '売却日':5, '管理番号':6, '仕入値':11, '販売価格':14, '手数料':18, '送料':16 };
 
 function makeUpdate(field, value) {
   const u = { field, value };

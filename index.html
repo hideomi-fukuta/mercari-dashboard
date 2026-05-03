@@ -162,6 +162,7 @@
     .btn-cancel{background:#f2f2f7;color:#1c1c1e;}
     .btn-save{background:#FF0211;color:white;}
     .btn-save:disabled{background:#ffb3b7;}
+    .btn-delete{width:100%;margin-top:8px;background:none;color:#ff3b30;border:1px solid #ff3b30;border-radius:12px;padding:14px;font-size:15px;font-weight:600;cursor:pointer;}
 
     /* ローディング/エラー */
     #loading{text-align:center;padding:60px 20px;color:#8e8e93;font-size:14px;}
@@ -287,6 +288,7 @@
       <button class="btn btn-cancel" onclick="closeOverlay(null,'editOverlay')">キャンセル</button>
       <button class="btn btn-save" id="saveProductBtn" onclick="saveProduct()">保存する</button>
     </div>
+    <button class="btn btn-delete" id="deleteProductBtn" onclick="deleteProduct()" style="display:none">この商品を削除する</button>
   </div>
 </div>
 
@@ -612,6 +614,7 @@ function openNewProduct() {
   ).join('');
   document.getElementById('saveProductBtn').disabled = false;
   document.getElementById('saveProductBtn').textContent = '登録する';
+  document.getElementById('deleteProductBtn').style.display = 'none';
   document.getElementById('editOverlay').classList.add('open');
 }
 
@@ -658,6 +661,7 @@ function openProductEdit(rowNum) {
   isNewProduct = false;
   document.getElementById('saveProductBtn').disabled = false;
   document.getElementById('saveProductBtn').textContent = '保存する';
+  document.getElementById('deleteProductBtn').style.display = 'block';
   document.getElementById('editOverlay').classList.add('open');
 }
 
@@ -751,6 +755,25 @@ async function saveProduct() {
     }
   } catch(e) { showToast('❌ ' + e.message); }
   btn.disabled = false; btn.textContent = '保存する';
+}
+
+async function deleteProduct() {
+  const p = editingProduct;
+  if (!p) return;
+  const name = col(p,'商品名') || '管理番号' + col(p,'管理番号');
+  if (!confirm(`「${name}」を削除しますか？`)) return;
+  const btn = document.getElementById('deleteProductBtn');
+  btn.disabled = true; btn.textContent = '削除中...';
+  try {
+    const res = await fetch(`${GAS_URL}?action=deleteProduct&row=${p._row}`);
+    const json = await res.json().catch(()=>({}));
+    if (json.error) { showToast('❌ ' + json.error); btn.disabled=false; btn.textContent='この商品を削除する'; return; }
+    productData = productData.filter(x => x._row !== p._row);
+    document.getElementById('editOverlay').classList.remove('open');
+    showToast('🗑️ 削除しました');
+    renderProducts(productData);
+  } catch(e) { showToast('❌ ' + e.message); }
+  btn.disabled = false; btn.textContent = 'この商品を削除する';
 }
 
 // ===== ユーティリティ =====

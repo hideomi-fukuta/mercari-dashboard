@@ -4,6 +4,7 @@ function doGet(e) {
 
   if (action === 'updateProduct') return handleUpdateProduct(params);
   if (action === 'addProduct')    return handleAddProduct(params);
+  if (action === 'deleteProduct') return handleDeleteProduct(params);
   if (action === 'updateSummary') return handleUpdateSummary(params);
   if (params.type === 'products') return getProducts();
   return getSummary();
@@ -54,6 +55,18 @@ function handleAddProduct(params) {
     }
     sheet.getRange(lastDataRow + 1, 1, 1, newRow.length).setValues([newRow]);
     return ContentService.createTextOutput(JSON.stringify({ success: true, appendedRow: lastDataRow + 1, newNum: maxNum + 1 })).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
+  }
+}
+
+function handleDeleteProduct(params) {
+  try {
+    var ss = SpreadsheetApp.openById(SSID);
+    var sheet = ss.getSheetByName('商品管理表');
+    var row = parseInt(params.row);
+    sheet.deleteRow(row);
+    return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
   } catch(err) {
     return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
   }

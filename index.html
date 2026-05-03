@@ -546,8 +546,7 @@ function filterProducts() {
 }
 
 function derivedStatus(p) {
-  // 売出日が入っていれば売却済
-  const soldDate = col(p,'売出日','売れた日','売却日');
+  const soldDate = col(p,'売却日');
   if (soldDate && String(soldDate).trim() !== '') return '売却済';
   return col(p,'出品状況') || '';
 }
@@ -640,7 +639,7 @@ function openProductEdit(rowNum) {
   document.getElementById('editShipping').value   = col(p,'送料') || '';
   document.getElementById('editShiireDate').value = toInputDate(col(p,'仕入日'));
   document.getElementById('editListDate').value   = toInputDate(col(p,'出品日'));
-  document.getElementById('editSoldDate').value   = toInputDate(col(p,'売出日','売却日','売れた日'));
+  document.getElementById('editSoldDate').value   = toInputDate(col(p,'売却日'));
   document.getElementById('editMemo').value       = col(p,'備考') || '';
 
   const cur = col(p,'出品状況');
@@ -691,8 +690,7 @@ async function saveProduct() {
   if (shipping !== '' && shipping !== String(col(p,'送料'))) updates.push({ field:actualCol(p,'送料'), value:Number(shipping) });
   if (shiireD !== String(col(p,'仕入日'))) updates.push({ field:actualCol(p,'仕入日'), value:shiireD });
   if (listD !== String(col(p,'出品日'))) updates.push({ field:actualCol(p,'出品日'), value:listD });
-  const soldKey = actualCol(p,'売出日','売却日','売れた日');
-  if (soldD !== String(col(p,'売出日','売却日','売れた日'))) updates.push({ field:soldKey, value:soldD });
+  if (soldD !== String(col(p,'売却日'))) updates.push({ field:'売却日', value:soldD });
   if (memo !== String(col(p,'備考'))) updates.push({ field:actualCol(p,'備考'), value:memo });
 
   try {
@@ -708,7 +706,7 @@ async function saveProduct() {
       if (shipping) fields['送料']     = Number(shipping);
       if (shiireD)  fields['仕入日']   = shiireD;
       if (listD)    fields['出品日']   = listD;
-      if (soldD)    fields['売出日']   = soldD;
+      if (soldD)    fields['売却日']   = soldD;
       if (memo)     fields['備考']     = memo;
       await fetch(GAS_URL, {
         method:'POST', mode:'no-cors',

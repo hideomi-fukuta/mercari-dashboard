@@ -65,6 +65,7 @@ function doPost(e) {
       var addHdrIdx = findHeaderRow(addData);
       var addHeaders = addData[addHdrIdx].map(function(h) { return String(h).trim(); });
       var addNumIdx = addHeaders.indexOf('管理番号');
+      if (addNumIdx === -1) addNumIdx = 6; // G列フォールバック
       var maxNum = 0;
       for (var i = addHdrIdx + 1; i < addData.length; i++) {
         var n = Number(addData[i][addNumIdx]);
@@ -73,18 +74,23 @@ function doPost(e) {
       var newRow = new Array(addHeaders.length).fill('');
       var fieldMap = params.fields;
       Object.keys(fieldMap).forEach(function(key) {
-        var idx = addHeaders.indexOf(key);
-        if (idx !== -1) newRow[idx] = fieldMap[key];
+        var idx = isNaN(Number(key)) ? addHeaders.indexOf(key) : Number(key);
+        if (idx !== -1 && idx < newRow.length) newRow[idx] = fieldMap[key];
       });
-      if (addNumIdx !== -1) newRow[addNumIdx] = maxNum + 1;
+      newRow[addNumIdx] = maxNum + 1;
       addSheet.appendRow(newRow);
 
     } else if (params.action === 'updateProduct') {
-      var updSheet  = ss.getSheetByName('商品管理表');
-      var updData   = updSheet.getDataRange().getValues();
-      var updHeaders = updData[params.headerRow - 1].map(function(h) { return String(h).trim(); });
-      var colIdx = updHeaders.indexOf(params.field);
-      if (colIdx === -1) return ContentService.createTextOutput(JSON.stringify({ error: '列が見つかりません: ' + params.field })).setMimeType(ContentService.MimeType.JSON);
+      var updSheet = ss.getSheetByName('商品管理表');
+      var colIdx;
+      if (params.colIdx !== undefined && params.colIdx !== null) {
+        colIdx = params.colIdx;
+      } else {
+        var updData = updSheet.getDataRange().getValues();
+        var updHeaders = updData[params.headerRow - 1].map(function(h) { return String(h).trim(); });
+        colIdx = updHeaders.indexOf(params.field);
+        if (colIdx === -1) return ContentService.createTextOutput(JSON.stringify({ error: '列が見つかりません: ' + params.field })).setMimeType(ContentService.MimeType.JSON);
+      }
       updSheet.getRange(params.row, colIdx + 1).setValue(params.value);
 
     } else {

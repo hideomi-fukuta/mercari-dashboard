@@ -411,18 +411,39 @@ async function saveSummary() {
 async function loadProducts() {
   document.getElementById('prodLoading').style.display = 'block';
   try {
-    const res = await fetch(GAS_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ type: 'products' })
-    });
-    if (!res.ok) throw new Error('HTTP ' + res.status);
-    const json = await res.json();
-    if (json.error) throw new Error(json.error);
-    productData = json.products;
-    productHeaders = json.headers;
-    // ヘッダー行番号を特定
-    headerRow = productData.length > 0 ? productData[0]._row - 1 : 4;
+    const SHEET_ID = '1og8AZ3rdm8f36lsE4TfI8ZsB9hhZGCi3jxWbqvp7deM';
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=%E5%95%86%E5%93%81%E7%AE%A1%E7%90%86%E8%A1%A8`;
+    const res = await fetch(url);
+    const text = await res.text();
+    const jsonStr = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/)[1];
+    const gviz = JSON.parse(jsonStr);
+    const table = gviz.table;
+
+    const allRows = table.rows.map(r =>
+      r.c ? r.c.map(cell => cell ? (cell.f != null ? cell.f : (cell.v != null ? cell.v : '')) : '') : []
+    );
+
+    let headerIdx = -1;
+    for (let i = 0; i < allRows.length; i++) {
+      if (allRows[i].includes('商品名') || allRows[i].includes('管理番号')) { headerIdx = i; break; }
+    }
+    if (headerIdx === -1) throw new Error('ヘッダー行が見つかりません');
+
+    const headers = allRows[headerIdx].map(h => String(h).trim());
+    productHeaders = headers;
+    headerRow = headerIdx + 1;
+
+    const nameIdx = headers.indexOf('商品名');
+    const numIdx  = headers.indexOf('管理番号');
+    productData = [];
+    for (let i = headerIdx + 1; i < allRows.length; i++) {
+      const row = allRows[i];
+      if (!row[nameIdx] && !row[numIdx]) continue;
+      const product = { _row: i + 1 };
+      headers.forEach((h, j) => { if (h) product[h] = row[j] !== undefined ? row[j] : ''; });
+      productData.push(product);
+    }
+
     buildFilters();
     renderProducts(productData);
   } catch(e) {

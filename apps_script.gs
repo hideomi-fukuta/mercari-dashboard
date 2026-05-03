@@ -23,27 +23,39 @@ function handleUpdateProduct(params) {
 }
 
 function handleAddProduct(params) {
-  var ss = SpreadsheetApp.openById(SSID);
-  var sheet = ss.getSheetByName('商品管理表');
-  var data  = sheet.getDataRange().getValues();
-  var hdrIdx = findHeaderRow(data);
-  var headers = data[hdrIdx].map(function(h) { return String(h).trim(); });
-  var numIdx = headers.indexOf('管理番号');
-  if (numIdx === -1) numIdx = 6;
-  var maxNum = 0;
-  for (var i = hdrIdx + 1; i < data.length; i++) {
-    var n = Number(data[i][numIdx]);
-    if (!isNaN(n) && n > maxNum) maxNum = n;
+  try {
+    var ss = SpreadsheetApp.openById(SSID);
+    var sheet = ss.getSheetByName('商品管理表');
+    if (!sheet) return ContentService.createTextOutput(JSON.stringify({ error: '商品管理表が見つかりません', sheets: ss.getSheets().map(function(s){return s.getName();}) })).setMimeType(ContentService.MimeType.JSON);
+    var data  = sheet.getDataRange().getValues();
+    var hdrIdx = findHeaderRow(data);
+    if (hdrIdx === -1) return ContentService.createTextOutput(JSON.stringify({ error: 'ヘッダー行が見つかりません' })).setMimeType(ContentService.MimeType.JSON);
+    var headers = data[hdrIdx].map(function(h) { return String(h).trim(); });
+    var nameIdx = headers.indexOf('商品名');
+    var numIdx = headers.indexOf('管理番号');
+    if (numIdx === -1) numIdx = 6;
+    var maxNum = 0;
+    for (var i = hdrIdx + 1; i < data.length; i++) {
+      var n = Number(data[i][numIdx]);
+      if (!isNaN(n) && n > maxNum) maxNum = n;
+    }
+    var fields = JSON.parse(params.fields);
+    var newRow = new Array(headers.length).fill('');
+    Object.keys(fields).forEach(function(key) {
+      var idx = isNaN(Number(key)) ? headers.indexOf(key) : Number(key);
+      if (idx !== -1 && idx < newRow.length) newRow[idx] = fields[key];
+    });
+    newRow[numIdx] = maxNum + 1;
+    // ヘッダー行以降で最後のデータ行を探す（空行や誤データを無視）
+    var lastDataRow = hdrIdx + 1;
+    for (var i = hdrIdx + 1; i < data.length; i++) {
+      if (data[i][nameIdx] || data[i][numIdx]) lastDataRow = i + 1;
+    }
+    sheet.getRange(lastDataRow + 1, 1, 1, newRow.length).setValues([newRow]);
+    return ContentService.createTextOutput(JSON.stringify({ success: true, appendedRow: lastDataRow + 1, newNum: maxNum + 1 })).setMimeType(ContentService.MimeType.JSON);
+  } catch(err) {
+    return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
   }
-  var fields = JSON.parse(params.fields);
-  var newRow = new Array(headers.length).fill('');
-  Object.keys(fields).forEach(function(key) {
-    var idx = isNaN(Number(key)) ? headers.indexOf(key) : Number(key);
-    if (idx !== -1 && idx < newRow.length) newRow[idx] = fields[key];
-  });
-  newRow[numIdx] = maxNum + 1;
-  sheet.appendRow(newRow);
-  return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
 }
 
 function handleUpdateSummary(params) {

@@ -500,7 +500,7 @@ async function loadProducts() {
       const product = { _row: i + 1 };
       headers.forEach((h, j) => { if (h) product[h] = row[j] !== undefined ? row[j] : ''; });
       // Position-based overrides for known columns (0-indexed)
-      const KNOWN_COLS = { '仕入日': 3, '出品日': 4, '売却日': 5, '管理番号': 6, '販売価格': 14, '手数料': 15, '送料': 16 };
+      const KNOWN_COLS = { '仕入日': 3, '出品日': 4, '売却日': 5, '管理番号': 6, '仕入値': 11, '販売価格': 14, '手数料': 15, '送料': 16 };
       Object.entries(KNOWN_COLS).forEach(([name, colIdx]) => {
         const v = row[colIdx];
         product[name] = (v !== undefined && v !== null) ? String(v) : '';
@@ -679,7 +679,7 @@ function actualCol(p, ...names) {
 }
 
 // D=3,E=4,F=5,G=6,O=14,P=15,Q=16 (0-indexed)
-const FIELD_COL = { '仕入日':3, '出品日':4, '売却日':5, '管理番号':6, '販売価格':14, '手数料':15, '送料':16 };
+const FIELD_COL = { '仕入日':3, '出品日':4, '売却日':5, '管理番号':6, '仕入値':11, '販売価格':14, '手数料':15, '送料':16 };
 
 function makeUpdate(field, value) {
   const u = { field, value };
@@ -708,7 +708,7 @@ async function saveProduct() {
       const fields = {};
       if (nameVal)  fields['商品名']              = nameVal;
       if (status)   fields['出品状況']            = status;
-      if (shiire)   fields['仕入値']              = Number(shiire);
+      if (shiire)   fields[FIELD_COL['仕入値']]   = Number(shiire);
       if (price)    fields[FIELD_COL['販売価格']] = Number(price);
       if (sakiVal)  fields['仕入先']              = sakiVal;
       if (fee)      fields[FIELD_COL['手数料']]   = Number(fee);

@@ -9,8 +9,10 @@ function doGet(e) {
   return getSummary();
 }
 
+var SSID = '1og8AZ3rdm8f36lsE4TfI8ZsB9hhZGCi3jxWbqvp7deM';
+
 function handleUpdateProduct(params) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SSID);
   var sheet = ss.getSheetByName('商品管理表');
   var row    = parseInt(params.row);
   var colIdx = parseInt(params.colIdx);
@@ -21,7 +23,7 @@ function handleUpdateProduct(params) {
 }
 
 function handleAddProduct(params) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SSID);
   var sheet = ss.getSheetByName('商品管理表');
   var data  = sheet.getDataRange().getValues();
   var hdrIdx = findHeaderRow(data);
@@ -45,7 +47,7 @@ function handleAddProduct(params) {
 }
 
 function handleUpdateSummary(params) {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SSID);
   var sheet = ss.getSheetByName('全体数値表') || ss.getSheets()[0];
   var data  = sheet.getDataRange().getValues();
   for (var i = 0; i < data.length; i++) {
@@ -58,7 +60,7 @@ function handleUpdateSummary(params) {
 }
 
 function getSummary() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SSID);
   var sheet = ss.getSheetByName('全体数値表') || ss.getSheets()[0];
   var data = sheet.getDataRange().getValues();
   var months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
@@ -83,7 +85,7 @@ function findHeaderRow(data) {
 }
 
 function getProducts() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var ss = SpreadsheetApp.openById(SSID);
   var sheet = ss.getSheetByName('商品管理表');
   if (!sheet) return ContentService.createTextOutput(JSON.stringify({ error: '商品管理表が見つかりません' })).setMimeType(ContentService.MimeType.JSON);
   var data = sheet.getDataRange().getValues();

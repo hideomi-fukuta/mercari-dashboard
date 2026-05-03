@@ -49,7 +49,8 @@ function handleAddProduct(params) {
     // ヘッダー行以降で最後のデータ行を探す（空行や誤データを無視）
     var lastDataRow = hdrIdx + 1;
     for (var i = hdrIdx + 1; i < data.length; i++) {
-      if (data[i][nameIdx] || data[i][numIdx]) lastDataRow = i + 1;
+      var num = Number(data[i][numIdx]);
+      if (!isNaN(num) && num > 0) lastDataRow = i + 1;
     }
     sheet.getRange(lastDataRow + 1, 1, 1, newRow.length).setValues([newRow]);
     return ContentService.createTextOutput(JSON.stringify({ success: true, appendedRow: lastDataRow + 1, newNum: maxNum + 1 })).setMimeType(ContentService.MimeType.JSON);

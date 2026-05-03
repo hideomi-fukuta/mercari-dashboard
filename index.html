@@ -470,7 +470,7 @@ async function loadProducts() {
   document.getElementById('prodLoading').style.display = 'block';
   try {
     const SHEET_ID = '1og8AZ3rdm8f36lsE4TfI8ZsB9hhZGCi3jxWbqvp7deM';
-    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&sheet=%E5%95%86%E5%93%81%E7%AE%A1%E7%90%86%E8%A1%A8`;
+    const url = `https://docs.google.com/spreadsheets/d/${SHEET_ID}/gviz/tq?tqx=out:json&headers=0&sheet=%E5%95%86%E5%93%81%E7%AE%A1%E7%90%86%E8%A1%A8`;
     const res = await fetch(url);
     const text = await res.text();
     const jsonStr = text.match(/google\.visualization\.Query\.setResponse\(([\s\S]*)\);?\s*$/)[1];

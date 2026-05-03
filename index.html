@@ -732,9 +732,12 @@ async function saveProduct() {
       if (listD !== String(col(p,'出品日')))                                     updates.push(makeUpdate('出品日', listD));
       if (soldD !== String(col(p,'売却日')))                                     updates.push(makeUpdate('売却日', soldD));
       if (memo !== String(col(p,'備考')))                                        updates.push(makeUpdate('備考', memo));
+      if (updates.length === 0) { showToast('変更なし'); btn.disabled=false; btn.textContent='保存する'; return; }
       for (const u of updates) {
         const up = new URLSearchParams({ action:'updateProduct', row:p._row, colIdx:u.colIdx, field:u.field, value:u.value });
-        await fetch(`${GAS_URL}?${up}`);
+        const res = await fetch(`${GAS_URL}?${up}`);
+        const json = await res.json().catch(()=>({}));
+        if (json.error) { showToast('❌ GASエラー: ' + json.error); btn.disabled=false; btn.textContent='保存する'; return; }
         p[u.field] = u.value;
       }
       renderProducts(productData.filter(x => {

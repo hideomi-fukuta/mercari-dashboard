@@ -9,218 +9,243 @@
   <meta name="apple-mobile-web-app-title" content="メルカリ管理">
   <meta name="theme-color" content="#FF0211">
   <style>
-    * { box-sizing: border-box; margin: 0; padding: 0; }
-
-    body {
-      font-family: -apple-system, BlinkMacSystemFont, 'Helvetica Neue', sans-serif;
-      background: #f2f2f7;
-      color: #1c1c1e;
-      min-height: 100vh;
-      padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
+    *{box-sizing:border-box;margin:0;padding:0;}
+    body{
+      font-family:-apple-system,BlinkMacSystemFont,'Helvetica Neue',sans-serif;
+      background:#f2f2f7;color:#1c1c1e;
+      min-height:100vh;
+      padding-bottom:calc(env(safe-area-inset-bottom) + 60px);
     }
-
-    header {
-      background: #FF0211;
-      color: white;
-      padding: 16px 20px 12px;
-      padding-top: calc(env(safe-area-inset-top) + 16px);
-      position: sticky;
-      top: 0;
-      z-index: 10;
+    header{
+      background:#FF0211;color:white;
+      padding:16px 20px 12px;
+      padding-top:calc(env(safe-area-inset-top) + 16px);
+      position:sticky;top:0;z-index:10;
     }
-
-    header h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
-
-    .month-scroll {
-      display: flex;
-      gap: 8px;
-      overflow-x: auto;
-      padding-bottom: 4px;
-      scrollbar-width: none;
+    header h1{font-size:20px;font-weight:700;margin-bottom:10px;}
+    .month-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px;scrollbar-width:none;}
+    .month-scroll::-webkit-scrollbar{display:none;}
+    .month-btn{
+      background:rgba(255,255,255,0.2);color:white;border:none;
+      border-radius:20px;padding:5px 12px;font-size:13px;font-weight:600;
+      white-space:nowrap;cursor:pointer;flex-shrink:0;
     }
-    .month-scroll::-webkit-scrollbar { display: none; }
+    .month-btn.active{background:white;color:#FF0211;}
 
-    .month-btn {
-      background: rgba(255,255,255,0.2);
-      color: white;
-      border: none;
-      border-radius: 20px;
-      padding: 6px 14px;
-      font-size: 14px;
-      font-weight: 600;
-      white-space: nowrap;
-      cursor: pointer;
-      flex-shrink: 0;
+    /* 下部ナビ */
+    .bottom-nav{
+      position:fixed;bottom:0;left:0;right:0;
+      background:white;
+      border-top:1px solid #e5e5ea;
+      display:flex;
+      padding-bottom:env(safe-area-inset-bottom);
+      z-index:20;
     }
-    .month-btn.active { background: white; color: #FF0211; }
-
-    main { padding: 16px; max-width: 600px; margin: 0 auto; }
-
-    .section-title {
-      font-size: 13px;
-      font-weight: 600;
-      color: #6c6c70;
-      text-transform: uppercase;
-      letter-spacing: 0.5px;
-      margin: 16px 0 8px;
+    .nav-btn{
+      flex:1;display:flex;flex-direction:column;align-items:center;
+      padding:8px 4px 6px;border:none;background:none;
+      color:#8e8e93;font-size:10px;font-weight:600;cursor:pointer;gap:3px;
     }
+    .nav-btn .icon{font-size:22px;line-height:1;}
+    .nav-btn.active{color:#FF0211;}
 
-    .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    /* 共通 */
+    .view{display:none;}
+    .view.active{display:block;}
+    main{padding:14px;max-width:600px;margin:0 auto;}
+    .section-title{font-size:12px;font-weight:600;color:#6c6c70;text-transform:uppercase;letter-spacing:0.5px;margin:14px 0 8px;}
+    .card-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;}
+    .card{background:white;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);position:relative;}
+    .card .label{font-size:12px;color:#6c6c70;margin-bottom:4px;}
+    .card .value{font-size:22px;font-weight:700;color:#1c1c1e;line-height:1;}
+    .card .value.large{font-size:28px;}
+    .card .value.positive{color:#34c759;}
+    .card .value.negative{color:#ff3b30;}
+    .edit-btn{position:absolute;top:8px;right:8px;background:none;border:none;color:#c7c7cc;font-size:15px;cursor:pointer;padding:4px;}
+    .progress-card{background:white;border-radius:14px;padding:14px;box-shadow:0 1px 3px rgba(0,0,0,0.08);}
+    .progress-card .head{display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;}
+    .progress-card .label{font-size:12px;color:#6c6c70;}
+    .progress-card .pct{font-size:20px;font-weight:700;}
+    .progress-bar{background:#e5e5ea;border-radius:6px;height:8px;overflow:hidden;}
+    .progress-fill{height:100%;border-radius:6px;background:#FF0211;transition:width 0.5s ease;}
+    .progress-fill.achieved{background:#34c759;}
+    .progress-meta{display:flex;justify-content:space-between;margin-top:5px;font-size:11px;color:#8e8e93;}
 
-    .card {
-      background: white;
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-      position: relative;
+    /* 商品一覧 */
+    .search-bar{
+      background:white;border-radius:12px;padding:10px 14px;
+      display:flex;align-items:center;gap:8px;
+      box-shadow:0 1px 3px rgba(0,0,0,0.08);margin-bottom:12px;
     }
-
-    .card .label { font-size: 13px; color: #6c6c70; margin-bottom: 6px; }
-    .card .value { font-size: 24px; font-weight: 700; color: #1c1c1e; line-height: 1; }
-    .card .value.large { font-size: 30px; }
-    .card .value.positive { color: #34c759; }
-    .card .value.negative { color: #ff3b30; }
-    .card .sub { font-size: 12px; color: #8e8e93; margin-top: 4px; }
-
-    .edit-btn {
-      position: absolute;
-      top: 10px;
-      right: 10px;
-      background: none;
-      border: none;
-      color: #c7c7cc;
-      font-size: 16px;
-      cursor: pointer;
-      padding: 4px;
-      line-height: 1;
+    .search-bar input{
+      flex:1;border:none;outline:none;font-size:15px;
+      background:transparent;color:#1c1c1e;
     }
-    .edit-btn:active { color: #FF0211; }
+    .search-bar input::placeholder{color:#c7c7cc;}
 
-    .edit-overlay {
-      display: none;
-      position: fixed;
-      inset: 0;
-      background: rgba(0,0,0,0.5);
-      z-index: 100;
-      align-items: flex-end;
-      justify-content: center;
+    .filter-scroll{display:flex;gap:8px;overflow-x:auto;padding-bottom:4px;margin-bottom:12px;scrollbar-width:none;}
+    .filter-scroll::-webkit-scrollbar{display:none;}
+    .filter-chip{
+      background:white;border:1.5px solid #e5e5ea;color:#1c1c1e;
+      border-radius:20px;padding:5px 14px;font-size:13px;font-weight:600;
+      white-space:nowrap;cursor:pointer;flex-shrink:0;
     }
-    .edit-overlay.open { display: flex; }
+    .filter-chip.active{background:#FF0211;border-color:#FF0211;color:white;}
 
-    .edit-sheet {
-      background: white;
-      border-radius: 20px 20px 0 0;
-      padding: 24px 20px;
-      padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
-      width: 100%;
-      max-width: 600px;
+    .product-card{
+      background:white;border-radius:14px;padding:14px;
+      box-shadow:0 1px 3px rgba(0,0,0,0.08);
+      margin-bottom:10px;cursor:pointer;
+      display:flex;align-items:flex-start;gap:10px;
     }
-    .edit-sheet h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
-    .edit-sheet p { font-size: 13px; color: #8e8e93; margin-bottom: 16px; }
+    .product-card:active{opacity:0.7;}
+    .product-num{
+      background:#f2f2f7;color:#8e8e93;
+      border-radius:8px;padding:4px 8px;
+      font-size:12px;font-weight:700;
+      min-width:36px;text-align:center;flex-shrink:0;
+    }
+    .product-body{flex:1;min-width:0;}
+    .product-name{font-size:14px;font-weight:700;margin-bottom:4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+    .product-meta{display:flex;flex-wrap:wrap;gap:6px;align-items:center;}
+    .badge{
+      font-size:11px;font-weight:600;padding:2px 8px;border-radius:10px;
+    }
+    .badge.status-検品済{background:#e3f2fd;color:#1565c0;}
+    .badge.status-出品中{background:#e8f5e9;color:#2e7d32;}
+    .badge.status-売れた{background:#fce4ec;color:#c62828;}
+    .badge.status-リペア{background:#fff3e0;color:#e65100;}
+    .badge.status-未出品{background:#f3e5f5;color:#6a1b9a;}
+    .badge.cat{background:#f2f2f7;color:#636366;}
+    .product-right{text-align:right;flex-shrink:0;}
+    .product-price{font-size:15px;font-weight:700;color:#1c1c1e;}
+    .product-days{font-size:11px;color:#8e8e93;margin-top:2px;}
+    .product-profit{font-size:12px;font-weight:600;}
+    .profit-pos{color:#34c759;}
+    .profit-neg{color:#ff3b30;}
 
-    .edit-input {
-      width: 100%;
-      border: 1.5px solid #e5e5ea;
-      border-radius: 12px;
-      padding: 14px 16px;
-      font-size: 20px;
-      font-weight: 600;
-      color: #1c1c1e;
-      outline: none;
-      margin-bottom: 12px;
+    /* 編集モーダル */
+    .overlay{
+      display:none;position:fixed;inset:0;
+      background:rgba(0,0,0,0.5);z-index:100;
+      align-items:flex-end;justify-content:center;
     }
-    .edit-input:focus { border-color: #FF0211; }
+    .overlay.open{display:flex;}
+    .sheet{
+      background:white;border-radius:20px 20px 0 0;
+      padding:20px;
+      padding-bottom:calc(env(safe-area-inset-bottom) + 20px);
+      width:100%;max-width:600px;max-height:80vh;overflow-y:auto;
+    }
+    .sheet-handle{width:36px;height:4px;background:#e5e5ea;border-radius:2px;margin:0 auto 16px;}
+    .sheet h3{font-size:16px;font-weight:700;margin-bottom:4px;}
+    .sheet .sub{font-size:12px;color:#8e8e93;margin-bottom:16px;}
+    .field-label{font-size:12px;font-weight:600;color:#6c6c70;margin-bottom:6px;}
+    .field-input{
+      width:100%;border:1.5px solid #e5e5ea;border-radius:12px;
+      padding:12px 14px;font-size:16px;color:#1c1c1e;
+      outline:none;margin-bottom:14px;background:white;
+    }
+    .field-input:focus{border-color:#FF0211;}
+    .status-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-bottom:14px;}
+    .status-opt{
+      border:1.5px solid #e5e5ea;border-radius:10px;
+      padding:10px 6px;text-align:center;
+      font-size:13px;font-weight:600;cursor:pointer;
+    }
+    .status-opt.selected{border-color:#FF0211;background:#fff0f1;color:#FF0211;}
+    .btn-row{display:flex;gap:10px;}
+    .btn{flex:1;padding:14px;border:none;border-radius:12px;font-size:15px;font-weight:700;cursor:pointer;}
+    .btn-cancel{background:#f2f2f7;color:#1c1c1e;}
+    .btn-save{background:#FF0211;color:white;}
+    .btn-save:disabled{background:#ffb3b7;}
 
-    .edit-actions { display: flex; gap: 10px; }
+    /* ローディング/エラー */
+    #loading{text-align:center;padding:60px 20px;color:#8e8e93;font-size:14px;}
+    #error{background:#fff3cd;border:1px solid #ffc107;border-radius:12px;padding:14px;margin:16px;font-size:13px;line-height:1.6;display:none;}
+    .spinner{width:30px;height:30px;border:3px solid #e5e5ea;border-top-color:#FF0211;border-radius:50%;animation:spin .8s linear infinite;margin:0 auto 10px;}
+    @keyframes spin{to{transform:rotate(360deg);}}
+    .toast{
+      position:fixed;bottom:calc(env(safe-area-inset-bottom) + 70px);
+      left:50%;transform:translateX(-50%) translateY(80px);
+      background:#1c1c1e;color:white;padding:10px 18px;
+      border-radius:20px;font-size:13px;font-weight:600;
+      transition:transform .3s ease;z-index:200;white-space:nowrap;
+    }
+    .toast.show{transform:translateX(-50%) translateY(0);}
 
-    .btn {
-      flex: 1;
-      padding: 14px;
-      border: none;
-      border-radius: 12px;
-      font-size: 16px;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    .btn-cancel { background: #f2f2f7; color: #1c1c1e; }
-    .btn-save { background: #FF0211; color: white; }
-    .btn-save:disabled { background: #ffb3b7; }
-
-    .progress-card {
-      background: white;
-      border-radius: 14px;
-      padding: 16px;
-      box-shadow: 0 1px 3px rgba(0,0,0,0.08);
-    }
-    .progress-card .header {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-bottom: 10px;
-    }
-    .progress-card .label { font-size: 13px; color: #6c6c70; }
-    .progress-card .pct { font-size: 22px; font-weight: 700; }
-    .progress-bar { background: #e5e5ea; border-radius: 6px; height: 10px; overflow: hidden; }
-    .progress-fill {
-      height: 100%;
-      border-radius: 6px;
-      background: #FF0211;
-      transition: width 0.5s ease;
-    }
-    .progress-fill.achieved { background: #34c759; }
-    .progress-meta { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #8e8e93; }
-
-    #loading { text-align: center; padding: 60px 20px; color: #8e8e93; font-size: 15px; }
-    #error { background: #fff3cd; border: 1px solid #ffc107; border-radius: 12px; padding: 16px; margin: 20px 16px; font-size: 14px; line-height: 1.6; display: none; }
-
-    .spinner {
-      width: 32px; height: 32px;
-      border: 3px solid #e5e5ea;
-      border-top-color: #FF0211;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-      margin: 0 auto 12px;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .toast {
-      position: fixed;
-      bottom: calc(env(safe-area-inset-bottom) + 20px);
-      left: 50%;
-      transform: translateX(-50%) translateY(80px);
-      background: #1c1c1e;
-      color: white;
-      padding: 12px 20px;
-      border-radius: 20px;
-      font-size: 14px;
-      font-weight: 600;
-      transition: transform 0.3s ease;
-      z-index: 200;
-      white-space: nowrap;
-    }
-    .toast.show { transform: translateX(-50%) translateY(0); }
+    #prodLoading{text-align:center;padding:40px;color:#8e8e93;font-size:13px;}
+    .empty{text-align:center;padding:40px;color:#8e8e93;font-size:14px;}
   </style>
 </head>
 <body>
 
 <header>
   <h1>📊 メルカリ管理</h1>
-  <div class="month-scroll" id="monthTabs"></div>
+  <div class="month-scroll" id="monthTabs" style="display:none"></div>
 </header>
 
-<div id="loading"><div class="spinner"></div>データを読み込み中...</div>
-<div id="error"><span id="errMsg"></span></div>
-<main id="dashboard" style="display:none"></main>
+<!-- ダッシュボード -->
+<div class="view active" id="viewDash">
+  <div id="loading"><div class="spinner"></div>読み込み中...</div>
+  <div id="error"><span id="errMsg"></span></div>
+  <main id="dashboard" style="display:none"></main>
+</div>
 
-<!-- 編集シート -->
-<div class="edit-overlay" id="editOverlay" onclick="closeEdit(event)">
-  <div class="edit-sheet">
-    <h3 id="editTitle"></h3>
-    <p id="editSub"></p>
-    <input class="edit-input" id="editInput" type="number" inputmode="numeric">
-    <div class="edit-actions">
-      <button class="btn btn-cancel" onclick="closeEdit()">キャンセル</button>
-      <button class="btn btn-save" id="saveBtn" onclick="saveEdit()">保存する</button>
+<!-- 商品一覧 -->
+<div class="view" id="viewProducts">
+  <main>
+    <div style="padding-top:14px">
+      <div class="search-bar">
+        <span style="color:#c7c7cc">🔍</span>
+        <input type="search" id="searchInput" placeholder="商品名で検索..." oninput="filterProducts()">
+      </div>
+      <div class="filter-scroll" id="statusFilters"></div>
+      <div id="prodLoading"><div class="spinner"></div>読み込み中...</div>
+      <div id="productList"></div>
+    </div>
+  </main>
+</div>
+
+<!-- 下部ナビ -->
+<nav class="bottom-nav">
+  <button class="nav-btn active" id="navDash" onclick="switchView('dash')">
+    <span class="icon">📊</span>ダッシュボード
+  </button>
+  <button class="nav-btn" id="navProducts" onclick="switchView('products')">
+    <span class="icon">📦</span>商品一覧
+  </button>
+</nav>
+
+<!-- 商品編集シート -->
+<div class="overlay" id="editOverlay" onclick="closeOverlay(event,'editOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="editProductName"></h3>
+    <div class="sub" id="editProductSub"></div>
+    <div class="field-label">出品状況</div>
+    <div class="status-grid" id="statusGrid"></div>
+    <div class="field-label">販売価格（円）</div>
+    <input class="field-input" id="editPrice" type="number" inputmode="numeric" placeholder="例: 8500">
+    <div class="field-label">備考</div>
+    <input class="field-input" id="editMemo" type="text" placeholder="メモを入力...">
+    <div class="btn-row">
+      <button class="btn btn-cancel" onclick="closeOverlay(null,'editOverlay')">キャンセル</button>
+      <button class="btn btn-save" id="saveProductBtn" onclick="saveProduct()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<!-- サマリー編集シート -->
+<div class="overlay" id="summaryEditOverlay" onclick="closeOverlay(event,'summaryEditOverlay')">
+  <div class="sheet">
+    <div class="sheet-handle"></div>
+    <h3 id="sEditTitle"></h3>
+    <div class="sub" id="sEditSub"></div>
+    <input class="field-input" id="sEditInput" type="number" inputmode="numeric">
+    <div class="btn-row">
+      <button class="btn btn-cancel" onclick="closeOverlay(null,'summaryEditOverlay')">キャンセル</button>
+      <button class="btn btn-save" id="sSaveBtn" onclick="saveSummary()">保存する</button>
     </div>
   </div>
 </div>
@@ -228,203 +253,327 @@
 <div class="toast" id="toast"></div>
 
 <script>
-  const GAS_URL = 'https://script.google.com/macros/s/AKfycbwksuXgHQOQl92vs5i-xoN3VyqOlCyZhEaLFV-f7ubqRtyMNS-cMjeSwyPM-W2m2aN7/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbwksuXgHQOQl92vs5i-xoN3VyqOlCyZhEaLFV-f7ubqRtyMNS-cMjeSwyPM-W2m2aN7/exec';
+const STATUS_LIST = ['検品済','出品中','売れた','リペア','未出品','廃棄'];
+const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
 
-  const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
-  // 編集可能な項目（計算式でなく手入力の項目）
-  const editableMetrics = ['売上','仕入','目標粗利','合計出品数','販売数','仕入数','出品中','平均売価'];
+let summaryData = null;
+let productData = null;
+let productHeaders = null;
+let headerRow = null;
+let currentMonthIdx = new Date().getMonth();
+let currentView = 'dash';
+let editingProduct = null;
+let sEditState = {};
+let activeFilter = '全て';
 
-  let currentData = null;
-  let currentMonthIdx = new Date().getMonth();
-  let editState = {};
+// ===== ビュー切り替え =====
+function switchView(view) {
+  currentView = view;
+  document.getElementById('viewDash').classList.toggle('active', view === 'dash');
+  document.getElementById('viewProducts').classList.toggle('active', view === 'products');
+  document.getElementById('navDash').classList.toggle('active', view === 'dash');
+  document.getElementById('navProducts').classList.toggle('active', view === 'products');
+  document.getElementById('monthTabs').style.display = view === 'dash' ? 'flex' : 'none';
+  if (view === 'products' && !productData) loadProducts();
+}
 
-  function fmt(val) {
-    if (val === '' || val === null || val === undefined) return '—';
-    const n = Number(val);
-    if (isNaN(n) || n === 0) return '¥0';
-    return '¥' + n.toLocaleString('ja-JP');
+// ===== フォーマット =====
+function fmt(v){ if(v===''||v==null)return '—'; const n=Number(v); return isNaN(n)||n===0?'¥0':'¥'+n.toLocaleString('ja-JP'); }
+function fmtNum(v){ if(v===''||v==null)return '—'; return Number(v).toLocaleString('ja-JP'); }
+function fmtPct(v){
+  if(v===''||v==null)return '—';
+  const n=Number(v); if(isNaN(n)||n===0)return '0%';
+  const p=n<2?n*100:n; return p.toFixed(1)+'%';
+}
+function getV(key,idx){ const a=summaryData[key]; return(a&&a[idx]!==undefined)?a[idx]:null; }
+
+// ===== ダッシュボード =====
+async function loadSummary() {
+  try {
+    const res = await fetch(GAS_URL + '?type=summary');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    summaryData = json.data;
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('dashboard').style.display = 'block';
+    buildTabs();
+    renderDash(currentMonthIdx);
+  } catch(e) {
+    document.getElementById('loading').style.display = 'none';
+    document.getElementById('error').style.display = 'block';
+    document.getElementById('errMsg').textContent = '⚠️ ' + e.message;
   }
-  function fmtNum(val) {
-    if (val === '' || val === null || val === undefined) return '—';
-    const n = Number(val);
-    return isNaN(n) ? '—' : n.toLocaleString('ja-JP');
-  }
-  function fmtPct(val) {
-    if (val === '' || val === null || val === undefined) return '—';
-    const n = Number(val);
-    if (isNaN(n) || n === 0) return '0%';
-    const pct = n < 2 ? n * 100 : n;
-    return pct.toFixed(1) + '%';
-  }
-  function getVal(key, idx) {
-    const arr = currentData[key];
-    return (arr && arr[idx] !== undefined) ? arr[idx] : null;
-  }
+}
 
-  function makeCard(label, valueHtml, editable, metric) {
-    const editBtn = editable
-      ? `<button class="edit-btn" onclick="openEdit('${metric}','${label}')" title="編集">✏️</button>`
-      : '';
-    return `<div class="card">${editBtn}<div class="label">${label}</div><div class="value">${valueHtml}</div></div>`;
-  }
+function buildTabs() {
+  const tabs = document.getElementById('monthTabs');
+  tabs.style.display = 'flex';
+  tabs.innerHTML = '';
+  months.forEach((m,i) => {
+    const b = document.createElement('button');
+    b.className = 'month-btn' + (i === currentMonthIdx ? ' active' : '');
+    b.textContent = m;
+    b.onclick = () => {
+      currentMonthIdx = i;
+      document.querySelectorAll('.month-btn').forEach((x,j) => x.classList.toggle('active', j===i));
+      renderDash(i);
+    };
+    tabs.appendChild(b);
+  });
+  setTimeout(() => {
+    const a = tabs.children[currentMonthIdx];
+    if (a) a.scrollIntoView({inline:'center',behavior:'smooth'});
+  }, 100);
+}
 
-  function renderDashboard(idx) {
-    const dash = document.getElementById('dashboard');
-    const urriage = getVal('売上', idx);
-    const shiire  = getVal('仕入', idx);
-    const arari   = getVal('粗利', idx);
-    const mokuhyo = getVal('目標粗利', idx);
-    const sa      = getVal('目標との差', idx);
-    const reach   = getVal('目標達成率', idx);
-    const shutsu  = getVal('出品中', idx);
-    const ureta   = getVal('販売数', idx);
-    const heikin  = getVal('平均売価', idx);
-    const hekiRi  = getVal('平均利益', idx);
-    const kaiten  = getVal('回転率', idx);
-    const rieki   = getVal('利益率', idx);
+function card(label, valHtml, metric) {
+  const btn = metric
+    ? `<button class="edit-btn" onclick="openSummaryEdit('${metric}','${label}')">✏️</button>`
+    : '';
+  return `<div class="card">${btn}<div class="label">${label}</div><div class="value">${valHtml}</div></div>`;
+}
 
-    let reachNum = 0;
-    if (reach !== null && reach !== '') {
-      const r = Number(reach);
-      reachNum = r < 2 ? r * 100 : r;
-    }
-    const isAchieved = reachNum >= 100;
-    const fillPct = Math.min(reachNum, 100).toFixed(1);
-    const saNum = Number(sa);
-    const saClass = saNum >= 0 ? 'positive' : 'negative';
-
-    dash.innerHTML = `
-      <div class="section-title">今月の売上</div>
-      <div class="card-grid">
-        ${makeCard('売上', `<span class="large">${fmt(urriage)}</span>`, true, '売上')}
-        ${makeCard('粗利', `<span class="large">${fmt(arari)}</span>`, false, '')}
+function renderDash(idx) {
+  const d = document.getElementById('dashboard');
+  const urriage=getV('売上',idx), shiire=getV('仕入',idx), arari=getV('粗利',idx);
+  const mokuhyo=getV('目標粗利',idx), sa=getV('目標との差',idx), reach=getV('目標達成率',idx);
+  const shutsu=getV('出品中',idx), ureta=getV('販売数',idx);
+  const heikin=getV('平均売価',idx), hekiRi=getV('平均利益',idx);
+  const kaiten=getV('回転率',idx), rieki=getV('利益率',idx);
+  let reachNum=0;
+  if(reach!=null&&reach!==''){const r=Number(reach);reachNum=r<2?r*100:r;}
+  const achieved=reachNum>=100;
+  const saNum=Number(sa);
+  d.innerHTML=`
+    <div class="section-title">今月の売上</div>
+    <div class="card-grid">
+      ${card('売上','<span class="large">'+fmt(urriage)+'</span>','売上')}
+      ${card('粗利','<span class="large">'+fmt(arari)+'</span>','')}
+    </div>
+    ${card('仕入',fmt(shiire),'仕入')}
+    <div class="section-title">目標達成</div>
+    <div class="progress-card">
+      <div class="head">
+        <div class="label">目標達成率</div>
+        <div class="pct" style="color:${achieved?'#34c759':'#FF0211'}">${fmtPct(reach)}</div>
       </div>
-      ${makeCard('仕入', fmt(shiire), true, '仕入')}
+      <div class="progress-bar"><div class="progress-fill ${achieved?'achieved':''}" style="width:${Math.min(reachNum,100).toFixed(1)}%"></div></div>
+      <div class="progress-meta"><span>目標: ${fmt(mokuhyo)}</span><span>差額: <span class="${saNum>=0?'positive':'negative'}">${fmt(sa)}</span></span></div>
+    </div>
+    <div class="section-title">出品状況</div>
+    <div class="card-grid">
+      ${card('出品中',fmtNum(shutsu)+'<span style="font-size:12px;color:#8e8e93"> 件</span>','出品中')}
+      ${card('販売数',fmtNum(ureta)+'<span style="font-size:12px;color:#8e8e93"> 件</span>','販売数')}
+    </div>
+    <div class="section-title">単価・効率</div>
+    <div class="card-grid">
+      ${card('平均売価',fmt(heikin),'平均売価')}
+      ${card('平均利益',fmt(hekiRi),'')}
+      ${card('利益率',fmtPct(rieki),'')}
+      ${card('回転率',fmtPct(kaiten),'')}
+    </div>
+    <div style="height:8px"></div>`;
+}
 
-      <div class="section-title">目標達成</div>
-      <div class="progress-card">
-        <div class="header">
-          <div class="label">目標達成率</div>
-          <div class="pct" style="color:${isAchieved ? '#34c759' : '#FF0211'}">${fmtPct(reach)}</div>
-        </div>
-        <div class="progress-bar">
-          <div class="progress-fill ${isAchieved ? 'achieved' : ''}" style="width:${fillPct}%"></div>
-        </div>
-        <div class="progress-meta">
-          <span>目標: ${fmt(mokuhyo)}</span>
-          <span>差額: <span class="${saClass}">${fmt(sa)}</span></span>
-        </div>
-      </div>
-
-      <div class="section-title">出品状況</div>
-      <div class="card-grid">
-        ${makeCard('出品中', `${fmtNum(shutsu)}<span style="font-size:13px;font-weight:400;color:#8e8e93"> 件</span>`, true, '出品中')}
-        ${makeCard('販売数', `${fmtNum(ureta)}<span style="font-size:13px;font-weight:400;color:#8e8e93"> 件</span>`, true, '販売数')}
-      </div>
-
-      <div class="section-title">単価・効率</div>
-      <div class="card-grid">
-        ${makeCard('平均売価', fmt(heikin), true, '平均売価')}
-        ${makeCard('平均利益', fmt(hekiRi), false, '')}
-        ${makeCard('利益率', fmtPct(rieki), false, '')}
-        ${makeCard('回転率', fmtPct(kaiten), false, '')}
-      </div>
-      <div style="height:8px"></div>
-    `;
-  }
-
-  function buildTabs() {
-    const tabs = document.getElementById('monthTabs');
-    tabs.innerHTML = '';
-    months.forEach((m, i) => {
-      const btn = document.createElement('button');
-      btn.className = 'month-btn' + (i === currentMonthIdx ? ' active' : '');
-      btn.textContent = m;
-      btn.onclick = () => {
-        currentMonthIdx = i;
-        document.querySelectorAll('.month-btn').forEach((b, j) => b.classList.toggle('active', j === i));
-        renderDashboard(i);
-      };
-      tabs.appendChild(btn);
+// サマリー編集
+function openSummaryEdit(metric, label) {
+  sEditState = { metric, label };
+  const cur = getV(metric, currentMonthIdx);
+  document.getElementById('sEditTitle').textContent = label + 'を編集';
+  document.getElementById('sEditSub').textContent = months[currentMonthIdx] + 'の値';
+  document.getElementById('sEditInput').value = cur ? Number(cur) : '';
+  document.getElementById('sSaveBtn').disabled = false;
+  document.getElementById('sSaveBtn').textContent = '保存する';
+  document.getElementById('summaryEditOverlay').classList.add('open');
+  setTimeout(() => document.getElementById('sEditInput').focus(), 100);
+}
+async function saveSummary() {
+  const val = document.getElementById('sEditInput').value;
+  if (val === '') return;
+  const btn = document.getElementById('sSaveBtn');
+  btn.disabled = true; btn.textContent = '保存中...';
+  try {
+    await fetch(GAS_URL, {
+      method:'POST', mode:'no-cors',
+      headers:{'Content-Type':'application/json'},
+      body: JSON.stringify({ metric:sEditState.metric, monthIdx:currentMonthIdx, value:val })
     });
-    setTimeout(() => {
-      const active = tabs.children[currentMonthIdx];
-      if (active) active.scrollIntoView({ inline: 'center', behavior: 'smooth' });
-    }, 100);
+    if (summaryData[sEditState.metric]) summaryData[sEditState.metric][currentMonthIdx] = Number(val);
+    renderDash(currentMonthIdx);
+    document.getElementById('summaryEditOverlay').classList.remove('open');
+    showToast('✅ 保存しました');
+  } catch(e) { showToast('❌ 保存に失敗しました'); }
+  btn.disabled = false; btn.textContent = '保存する';
+}
+
+// ===== 商品一覧 =====
+async function loadProducts() {
+  document.getElementById('prodLoading').style.display = 'block';
+  try {
+    const res = await fetch(GAS_URL + '?type=products');
+    if (!res.ok) throw new Error('HTTP ' + res.status);
+    const json = await res.json();
+    if (json.error) throw new Error(json.error);
+    productData = json.products;
+    productHeaders = json.headers;
+    // ヘッダー行番号を特定
+    headerRow = productData.length > 0 ? productData[0]._row - 1 : 4;
+    buildFilters();
+    renderProducts(productData);
+  } catch(e) {
+    document.getElementById('prodLoading').innerHTML = '⚠️ ' + e.message;
   }
+  document.getElementById('prodLoading').style.display = 'none';
+}
 
-  async function loadData() {
-    try {
-      const res = await fetch(GAS_URL);
-      if (!res.ok) throw new Error('HTTP ' + res.status);
-      const json = await res.json();
-      currentData = json.data;
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('dashboard').style.display = 'block';
-      buildTabs();
-      renderDashboard(currentMonthIdx);
-    } catch(e) {
-      document.getElementById('loading').style.display = 'none';
-      document.getElementById('error').style.display = 'block';
-      document.getElementById('errMsg').textContent = '⚠️ ' + e.message;
-    }
+function col(product, ...names) {
+  for (const n of names) {
+    if (product[n] !== undefined && product[n] !== '') return product[n];
   }
+  return '';
+}
 
-  // --- 編集機能 ---
-  function openEdit(metric, label) {
-    editState = { metric, label };
-    const current = getVal(metric, currentMonthIdx);
-    document.getElementById('editTitle').textContent = label + 'を編集';
-    document.getElementById('editSub').textContent = months[currentMonthIdx] + 'の値を入力してください';
-    document.getElementById('editInput').value = current ? Number(current) : '';
-    document.getElementById('saveBtn').disabled = false;
-    document.getElementById('editOverlay').classList.add('open');
-    setTimeout(() => document.getElementById('editInput').focus(), 100);
+function buildFilters() {
+  const statuses = ['全て', ...STATUS_LIST];
+  const div = document.getElementById('statusFilters');
+  div.innerHTML = '';
+  statuses.forEach(s => {
+    const chip = document.createElement('div');
+    chip.className = 'filter-chip' + (s === activeFilter ? ' active' : '');
+    chip.textContent = s === '全て' ? `全て(${productData.length})` : s;
+    chip.onclick = () => {
+      activeFilter = s;
+      document.querySelectorAll('.filter-chip').forEach((c,i) => c.classList.toggle('active', statuses[i]===s));
+      filterProducts();
+    };
+    div.appendChild(chip);
+  });
+}
+
+function filterProducts() {
+  if (!productData) return;
+  const q = document.getElementById('searchInput').value.toLowerCase();
+  const filtered = productData.filter(p => {
+    const name = String(col(p,'商品名')).toLowerCase();
+    const matchQ = !q || name.includes(q);
+    const status = String(col(p,'出品状況'));
+    const matchF = activeFilter === '全て' || status === activeFilter;
+    return matchQ && matchF;
+  });
+  renderProducts(filtered);
+}
+
+function renderProducts(list) {
+  const div = document.getElementById('productList');
+  if (!list || list.length === 0) {
+    div.innerHTML = '<div class="empty">商品が見つかりません</div>';
+    return;
   }
+  div.innerHTML = list.map(p => {
+    const name   = col(p,'商品名') || '（商品名なし）';
+    const num    = col(p,'管理番号');
+    const status = col(p,'出品状況');
+    const cat    = col(p,'カテゴリ');
+    const price  = col(p,'販売価格','仕入値','仕入点数');
+    const days   = col(p,'経過日数');
+    const profit = col(p,'利益率');
+    const pn     = parseFloat(profit);
+    const profitClass = isNaN(pn) ? '' : (pn >= 0 ? 'profit-pos' : 'profit-neg');
+    const profitTxt = isNaN(pn) ? '' : (pn < 2 ? (pn*100).toFixed(1) : pn.toFixed(1)) + '%';
+    return `
+      <div class="product-card" onclick="openProductEdit(${p._row})">
+        ${num ? `<div class="product-num">${num}</div>` : ''}
+        <div class="product-body">
+          <div class="product-name">${name}</div>
+          <div class="product-meta">
+            ${status ? `<span class="badge status-${status}">${status}</span>` : ''}
+            ${cat ? `<span class="badge cat">${cat}</span>` : ''}
+          </div>
+        </div>
+        <div class="product-right">
+          ${price ? `<div class="product-price">${fmt(price)}</div>` : ''}
+          ${days ? `<div class="product-days">${days}日経過</div>` : ''}
+          ${profitTxt ? `<div class="product-profit ${profitClass}">${profitTxt}</div>` : ''}
+        </div>
+      </div>`;
+  }).join('');
+}
 
-  function closeEdit(e) {
-    if (e && e.target !== document.getElementById('editOverlay')) return;
-    document.getElementById('editOverlay').classList.remove('open');
-  }
+// 商品編集
+function openProductEdit(rowNum) {
+  const p = productData.find(x => x._row === rowNum);
+  if (!p) return;
+  editingProduct = p;
+  document.getElementById('editProductName').textContent = col(p,'商品名') || '商品';
+  document.getElementById('editProductSub').textContent = col(p,'カテゴリ') + '　仕入: ' + col(p,'仕入日');
+  document.getElementById('editPrice').value = col(p,'販売価格') || '';
+  document.getElementById('editMemo').value = col(p,'備考') || '';
 
-  async function saveEdit() {
-    const val = document.getElementById('editInput').value;
-    if (val === '') return;
-    const btn = document.getElementById('saveBtn');
-    btn.disabled = true;
-    btn.textContent = '保存中...';
+  // ステータスボタン
+  const cur = col(p,'出品状況');
+  document.getElementById('statusGrid').innerHTML = STATUS_LIST.map(s =>
+    `<div class="status-opt ${s===cur?'selected':''}" onclick="selectStatus(this,'${s}')">${s}</div>`
+  ).join('');
 
-    try {
+  document.getElementById('saveProductBtn').disabled = false;
+  document.getElementById('saveProductBtn').textContent = '保存する';
+  document.getElementById('editOverlay').classList.add('open');
+}
+
+function selectStatus(el, val) {
+  document.querySelectorAll('.status-opt').forEach(x => x.classList.remove('selected'));
+  el.classList.add('selected');
+}
+
+async function saveProduct() {
+  const p = editingProduct;
+  const status = document.querySelector('.status-opt.selected')?.textContent || '';
+  const price  = document.getElementById('editPrice').value;
+  const memo   = document.getElementById('editMemo').value;
+  const btn = document.getElementById('saveProductBtn');
+  btn.disabled = true; btn.textContent = '保存中...';
+
+  const updates = [];
+  if (status && status !== col(p,'出品状況')) updates.push({ field:'出品状況', value:status });
+  if (price !== '' && price !== String(col(p,'販売価格'))) updates.push({ field:'販売価格', value:Number(price) });
+  if (memo !== String(col(p,'備考'))) updates.push({ field:'備考', value:memo });
+
+  try {
+    for (const u of updates) {
       await fetch(GAS_URL, {
-        method: 'POST',
-        mode: 'no-cors',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ metric: editState.metric, monthIdx: currentMonthIdx, value: val })
+        method:'POST', mode:'no-cors',
+        headers:{'Content-Type':'application/json'},
+        body: JSON.stringify({ action:'updateProduct', row:p._row, headerRow:headerRow, field:u.field, value:u.value })
       });
-
-      // ローカルデータを更新
-      if (currentData[editState.metric]) {
-        currentData[editState.metric][currentMonthIdx] = Number(val);
-      }
-      renderDashboard(currentMonthIdx);
-      document.getElementById('editOverlay').classList.remove('open');
-      showToast('✅ 保存しました');
-    } catch(e) {
-      showToast('❌ 保存に失敗しました');
+      p[u.field] = u.value;
     }
+    renderProducts(productData.filter(x => {
+      const q = document.getElementById('searchInput').value.toLowerCase();
+      const matchQ = !q || String(col(x,'商品名')).toLowerCase().includes(q);
+      const matchF = activeFilter === '全て' || col(x,'出品状況') === activeFilter;
+      return matchQ && matchF;
+    }));
+    document.getElementById('editOverlay').classList.remove('open');
+    showToast(updates.length ? '✅ 保存しました' : '変更なし');
+  } catch(e) { showToast('❌ ' + e.message); }
+  btn.disabled = false; btn.textContent = '保存する';
+}
 
-    btn.disabled = false;
-    btn.textContent = '保存する';
-  }
+// ===== ユーティリティ =====
+function closeOverlay(e, id) {
+  if (e && e.target !== document.getElementById(id)) return;
+  document.getElementById(id).classList.remove('open');
+}
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg;
+  t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2500);
+}
 
-  function showToast(msg) {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.classList.add('show');
-    setTimeout(() => t.classList.remove('show'), 2500);
-  }
-
-  loadData();
+// 初期化
+loadSummary();
 </script>
 </body>
 </html>

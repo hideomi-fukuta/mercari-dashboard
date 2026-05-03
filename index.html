@@ -453,11 +453,8 @@ async function saveSummary() {
   const btn = document.getElementById('sSaveBtn');
   btn.disabled = true; btn.textContent = '保存中...';
   try {
-    await fetch(GAS_URL, {
-      method:'POST', mode:'no-cors',
-      headers:{'Content-Type':'text/plain'},
-      body: JSON.stringify({ metric:sEditState.metric, monthIdx:currentMonthIdx, value:val })
-    });
+    const sp = new URLSearchParams({ action:'updateSummary', metric:sEditState.metric, monthIdx:currentMonthIdx, value:val });
+    await fetch(`${GAS_URL}?${sp}`);
     if (summaryData[sEditState.metric]) summaryData[sEditState.metric][currentMonthIdx] = Number(val);
     renderDash(currentMonthIdx);
     document.getElementById('summaryEditOverlay').classList.remove('open');
@@ -716,11 +713,8 @@ async function saveProduct() {
       if (listD)    fields[FIELD_COL['出品日']]   = listD;
       if (soldD)    fields[FIELD_COL['売却日']]   = soldD;
       if (memo)     fields['備考']                = memo;
-      await fetch(GAS_URL, {
-        method:'POST', mode:'no-cors',
-        headers:{'Content-Type':'text/plain'},
-        body: JSON.stringify({ action:'addProduct', fields })
-      });
+      const ap = new URLSearchParams({ action:'addProduct', fields: JSON.stringify(fields) });
+      await fetch(`${GAS_URL}?${ap}`);
       document.getElementById('editOverlay').classList.remove('open');
       showToast('✅ 登録しました！リストを更新します');
       productData = null;
@@ -739,11 +733,8 @@ async function saveProduct() {
       if (soldD !== String(col(p,'売却日')))                                     updates.push(makeUpdate('売却日', soldD));
       if (memo !== String(col(p,'備考')))                                        updates.push(makeUpdate('備考', memo));
       for (const u of updates) {
-        await fetch(GAS_URL, {
-          method:'POST', mode:'no-cors',
-          headers:{'Content-Type':'text/plain'},
-          body: JSON.stringify({ action:'updateProduct', row:p._row, headerRow:headerRow, field:u.field, colIdx:u.colIdx, value:u.value })
-        });
+        const up = new URLSearchParams({ action:'updateProduct', row:p._row, colIdx:u.colIdx, field:u.field, value:u.value });
+        await fetch(`${GAS_URL}?${up}`);
         p[u.field] = u.value;
       }
       renderProducts(productData.filter(x => {

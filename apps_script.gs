@@ -1,7 +1,60 @@
 function doGet(e) {
-  var type = e && e.parameter && e.parameter.type ? e.parameter.type : 'summary';
-  if (type === 'products') { return getProducts(); }
+  var params = e ? e.parameter : {};
+  var action = params.action || '';
+
+  if (action === 'updateProduct') return handleUpdateProduct(params);
+  if (action === 'addProduct')    return handleAddProduct(params);
+  if (action === 'updateSummary') return handleUpdateSummary(params);
+  if (params.type === 'products') return getProducts();
   return getSummary();
+}
+
+function handleUpdateProduct(params) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('商品管理表');
+  var row    = parseInt(params.row);
+  var colIdx = parseInt(params.colIdx);
+  var value  = params.value;
+  if (!isNaN(parseFloat(value)) && isFinite(value)) value = parseFloat(value);
+  sheet.getRange(row, colIdx + 1).setValue(value);
+  return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleAddProduct(params) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('商品管理表');
+  var data  = sheet.getDataRange().getValues();
+  var hdrIdx = findHeaderRow(data);
+  var headers = data[hdrIdx].map(function(h) { return String(h).trim(); });
+  var numIdx = headers.indexOf('管理番号');
+  if (numIdx === -1) numIdx = 6;
+  var maxNum = 0;
+  for (var i = hdrIdx + 1; i < data.length; i++) {
+    var n = Number(data[i][numIdx]);
+    if (!isNaN(n) && n > maxNum) maxNum = n;
+  }
+  var fields = JSON.parse(params.fields);
+  var newRow = new Array(headers.length).fill('');
+  Object.keys(fields).forEach(function(key) {
+    var idx = isNaN(Number(key)) ? headers.indexOf(key) : Number(key);
+    if (idx !== -1 && idx < newRow.length) newRow[idx] = fields[key];
+  });
+  newRow[numIdx] = maxNum + 1;
+  sheet.appendRow(newRow);
+  return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function handleUpdateSummary(params) {
+  var ss = SpreadsheetApp.getActiveSpreadsheet();
+  var sheet = ss.getSheetByName('全体数値表') || ss.getSheets()[0];
+  var data  = sheet.getDataRange().getValues();
+  for (var i = 0; i < data.length; i++) {
+    if (String(data[i][1]).trim() === params.metric) {
+      sheet.getRange(i + 1, parseInt(params.monthIdx) + 3).setValue(Number(params.value));
+      return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify({ error: '項目が見つかりません' })).setMimeType(ContentService.MimeType.JSON);
 }
 
 function getSummary() {
@@ -52,60 +105,4 @@ function getProducts() {
     products.push(product);
   }
   return ContentService.createTextOutput(JSON.stringify({ headers: headers, products: products })).setMimeType(ContentService.MimeType.JSON);
-}
-
-function doPost(e) {
-  try {
-    var params = JSON.parse(e.postData.contents);
-    var ss = SpreadsheetApp.getActiveSpreadsheet();
-
-    if (params.action === 'addProduct') {
-      var addSheet = ss.getSheetByName('商品管理表');
-      var addData  = addSheet.getDataRange().getValues();
-      var addHdrIdx = findHeaderRow(addData);
-      var addHeaders = addData[addHdrIdx].map(function(h) { return String(h).trim(); });
-      var addNumIdx = addHeaders.indexOf('管理番号');
-      if (addNumIdx === -1) addNumIdx = 6; // G列フォールバック
-      var maxNum = 0;
-      for (var i = addHdrIdx + 1; i < addData.length; i++) {
-        var n = Number(addData[i][addNumIdx]);
-        if (!isNaN(n) && n > maxNum) maxNum = n;
-      }
-      var newRow = new Array(addHeaders.length).fill('');
-      var fieldMap = params.fields;
-      Object.keys(fieldMap).forEach(function(key) {
-        var idx = isNaN(Number(key)) ? addHeaders.indexOf(key) : Number(key);
-        if (idx !== -1 && idx < newRow.length) newRow[idx] = fieldMap[key];
-      });
-      newRow[addNumIdx] = maxNum + 1;
-      addSheet.appendRow(newRow);
-
-    } else if (params.action === 'updateProduct') {
-      var updSheet = ss.getSheetByName('商品管理表');
-      var colIdx;
-      if (params.colIdx !== undefined && params.colIdx !== null) {
-        colIdx = params.colIdx;
-      } else {
-        var updData = updSheet.getDataRange().getValues();
-        var updHeaders = updData[params.headerRow - 1].map(function(h) { return String(h).trim(); });
-        colIdx = updHeaders.indexOf(params.field);
-        if (colIdx === -1) return ContentService.createTextOutput(JSON.stringify({ error: '列が見つかりません: ' + params.field })).setMimeType(ContentService.MimeType.JSON);
-      }
-      updSheet.getRange(params.row, colIdx + 1).setValue(params.value);
-
-    } else {
-      var sumSheet = ss.getSheetByName('全体数値表') || ss.getSheets()[0];
-      var sumData  = sumSheet.getDataRange().getValues();
-      var targetRow = -1;
-      for (var i = 0; i < sumData.length; i++) {
-        if (String(sumData[i][1]).trim() === params.metric) { targetRow = i; break; }
-      }
-      if (targetRow === -1) return ContentService.createTextOutput(JSON.stringify({ error: '項目が見つかりません' })).setMimeType(ContentService.MimeType.JSON);
-      sumSheet.getRange(targetRow + 1, params.monthIdx + 3).setValue(Number(params.value));
-    }
-
-    return ContentService.createTextOutput(JSON.stringify({ success: true })).setMimeType(ContentService.MimeType.JSON);
-  } catch(err) {
-    return ContentService.createTextOutput(JSON.stringify({ error: err.message })).setMimeType(ContentService.MimeType.JSON);
-  }
 }

@@ -16,7 +16,7 @@
       background: #f2f2f7;
       color: #1c1c1e;
       min-height: 100vh;
-      padding-bottom: env(safe-area-inset-bottom);
+      padding-bottom: calc(env(safe-area-inset-bottom) + 16px);
     }
 
     header {
@@ -29,11 +29,7 @@
       z-index: 10;
     }
 
-    header h1 {
-      font-size: 22px;
-      font-weight: 700;
-      margin-bottom: 12px;
-    }
+    header h1 { font-size: 22px; font-weight: 700; margin-bottom: 12px; }
 
     .month-scroll {
       display: flex;
@@ -56,16 +52,9 @@
       cursor: pointer;
       flex-shrink: 0;
     }
-    .month-btn.active {
-      background: white;
-      color: #FF0211;
-    }
+    .month-btn.active { background: white; color: #FF0211; }
 
-    main {
-      padding: 16px;
-      max-width: 600px;
-      margin: 0 auto;
-    }
+    main { padding: 16px; max-width: 600px; margin: 0 auto; }
 
     .section-title {
       font-size: 13px;
@@ -76,41 +65,86 @@
       margin: 16px 0 8px;
     }
 
-    .card-grid {
-      display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 12px;
-    }
-    .card-grid.single { grid-template-columns: 1fr; }
+    .card-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
 
     .card {
       background: white;
       border-radius: 14px;
       padding: 16px;
       box-shadow: 0 1px 3px rgba(0,0,0,0.08);
+      position: relative;
     }
 
-    .card .label {
-      font-size: 13px;
-      color: #6c6c70;
-      margin-bottom: 6px;
-    }
-
-    .card .value {
-      font-size: 26px;
-      font-weight: 700;
-      color: #1c1c1e;
-      line-height: 1;
-    }
-    .card .value.large { font-size: 32px; }
+    .card .label { font-size: 13px; color: #6c6c70; margin-bottom: 6px; }
+    .card .value { font-size: 24px; font-weight: 700; color: #1c1c1e; line-height: 1; }
+    .card .value.large { font-size: 30px; }
     .card .value.positive { color: #34c759; }
     .card .value.negative { color: #ff3b30; }
+    .card .sub { font-size: 12px; color: #8e8e93; margin-top: 4px; }
 
-    .card .sub {
-      font-size: 12px;
-      color: #8e8e93;
-      margin-top: 4px;
+    .edit-btn {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+      background: none;
+      border: none;
+      color: #c7c7cc;
+      font-size: 16px;
+      cursor: pointer;
+      padding: 4px;
+      line-height: 1;
     }
+    .edit-btn:active { color: #FF0211; }
+
+    .edit-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 100;
+      align-items: flex-end;
+      justify-content: center;
+    }
+    .edit-overlay.open { display: flex; }
+
+    .edit-sheet {
+      background: white;
+      border-radius: 20px 20px 0 0;
+      padding: 24px 20px;
+      padding-bottom: calc(env(safe-area-inset-bottom) + 24px);
+      width: 100%;
+      max-width: 600px;
+    }
+    .edit-sheet h3 { font-size: 18px; font-weight: 700; margin-bottom: 4px; }
+    .edit-sheet p { font-size: 13px; color: #8e8e93; margin-bottom: 16px; }
+
+    .edit-input {
+      width: 100%;
+      border: 1.5px solid #e5e5ea;
+      border-radius: 12px;
+      padding: 14px 16px;
+      font-size: 20px;
+      font-weight: 600;
+      color: #1c1c1e;
+      outline: none;
+      margin-bottom: 12px;
+    }
+    .edit-input:focus { border-color: #FF0211; }
+
+    .edit-actions { display: flex; gap: 10px; }
+
+    .btn {
+      flex: 1;
+      padding: 14px;
+      border: none;
+      border-radius: 12px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    .btn-cancel { background: #f2f2f7; color: #1c1c1e; }
+    .btn-save { background: #FF0211; color: white; }
+    .btn-save:disabled { background: #ffb3b7; }
 
     .progress-card {
       background: white;
@@ -125,16 +159,8 @@
       margin-bottom: 10px;
     }
     .progress-card .label { font-size: 13px; color: #6c6c70; }
-    .progress-card .pct {
-      font-size: 22px;
-      font-weight: 700;
-    }
-    .progress-bar {
-      background: #e5e5ea;
-      border-radius: 6px;
-      height: 10px;
-      overflow: hidden;
-    }
+    .progress-card .pct { font-size: 22px; font-weight: 700; }
+    .progress-bar { background: #e5e5ea; border-radius: 6px; height: 10px; overflow: hidden; }
     .progress-fill {
       height: 100%;
       border-radius: 6px;
@@ -142,35 +168,13 @@
       transition: width 0.5s ease;
     }
     .progress-fill.achieved { background: #34c759; }
-    .progress-meta {
-      display: flex;
-      justify-content: space-between;
-      margin-top: 6px;
-      font-size: 12px;
-      color: #8e8e93;
-    }
+    .progress-meta { display: flex; justify-content: space-between; margin-top: 6px; font-size: 12px; color: #8e8e93; }
 
-    #loading {
-      text-align: center;
-      padding: 60px 20px;
-      color: #8e8e93;
-      font-size: 15px;
-    }
-
-    #error {
-      background: #fff3cd;
-      border: 1px solid #ffc107;
-      border-radius: 12px;
-      padding: 16px;
-      margin: 20px 16px;
-      font-size: 14px;
-      line-height: 1.6;
-      display: none;
-    }
+    #loading { text-align: center; padding: 60px 20px; color: #8e8e93; font-size: 15px; }
+    #error { background: #fff3cd; border: 1px solid #ffc107; border-radius: 12px; padding: 16px; margin: 20px 16px; font-size: 14px; line-height: 1.6; display: none; }
 
     .spinner {
-      width: 32px;
-      height: 32px;
+      width: 32px; height: 32px;
       border: 3px solid #e5e5ea;
       border-top-color: #FF0211;
       border-radius: 50%;
@@ -178,6 +182,23 @@
       margin: 0 auto 12px;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
+
+    .toast {
+      position: fixed;
+      bottom: calc(env(safe-area-inset-bottom) + 20px);
+      left: 50%;
+      transform: translateX(-50%) translateY(80px);
+      background: #1c1c1e;
+      color: white;
+      padding: 12px 20px;
+      border-radius: 20px;
+      font-size: 14px;
+      font-weight: 600;
+      transition: transform 0.3s ease;
+      z-index: 200;
+      white-space: nowrap;
+    }
+    .toast.show { transform: translateX(-50%) translateY(0); }
   </style>
 </head>
 <body>
@@ -187,72 +208,81 @@
   <div class="month-scroll" id="monthTabs"></div>
 </header>
 
-<div id="loading">
-  <div class="spinner"></div>
-  データを読み込み中...
-</div>
-
-<div id="error">
-  ⚠️ データを読み込めませんでした。<br>
-  GAS_URLを正しく設定してください。<br><br>
-  <code id="errMsg"></code>
-</div>
-
+<div id="loading"><div class="spinner"></div>データを読み込み中...</div>
+<div id="error"><span id="errMsg"></span></div>
 <main id="dashboard" style="display:none"></main>
 
+<!-- 編集シート -->
+<div class="edit-overlay" id="editOverlay" onclick="closeEdit(event)">
+  <div class="edit-sheet">
+    <h3 id="editTitle"></h3>
+    <p id="editSub"></p>
+    <input class="edit-input" id="editInput" type="number" inputmode="numeric">
+    <div class="edit-actions">
+      <button class="btn btn-cancel" onclick="closeEdit()">キャンセル</button>
+      <button class="btn btn-save" id="saveBtn" onclick="saveEdit()">保存する</button>
+    </div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
 <script>
-  // ★ここにGoogle Apps ScriptのウェブアプリURLを貼り付ける
   const GAS_URL = 'https://script.google.com/macros/s/AKfycbwksuXgHQOQl92vs5i-xoN3VyqOlCyZhEaLFV-f7ubqRtyMNS-cMjeSwyPM-W2m2aN7/exec';
 
   const months = ['1月','2月','3月','4月','5月','6月','7月','8月','9月','10月','11月','12月'];
+  // 編集可能な項目（計算式でなく手入力の項目）
+  const editableMetrics = ['売上','仕入','目標粗利','合計出品数','販売数','仕入数','出品中','平均売価'];
+
   let currentData = null;
-  let currentMonthIdx = new Date().getMonth(); // 今月(0始まり)
+  let currentMonthIdx = new Date().getMonth();
+  let editState = {};
 
   function fmt(val) {
     if (val === '' || val === null || val === undefined) return '—';
     const n = Number(val);
-    if (isNaN(n)) return String(val);
+    if (isNaN(n) || n === 0) return '¥0';
     return '¥' + n.toLocaleString('ja-JP');
   }
-
   function fmtNum(val) {
     if (val === '' || val === null || val === undefined) return '—';
-    return Number(val).toLocaleString('ja-JP');
+    const n = Number(val);
+    return isNaN(n) ? '—' : n.toLocaleString('ja-JP');
   }
-
   function fmtPct(val) {
     if (val === '' || val === null || val === undefined) return '—';
     const n = Number(val);
     if (isNaN(n) || n === 0) return '0%';
-    // GASからは小数(0.214)で来る場合と文字列(21.4%)で来る場合がある
     const pct = n < 2 ? n * 100 : n;
     return pct.toFixed(1) + '%';
   }
-
   function getVal(key, idx) {
     const arr = currentData[key];
-    if (!arr || arr[idx] === undefined) return null;
-    return arr[idx];
+    return (arr && arr[idx] !== undefined) ? arr[idx] : null;
+  }
+
+  function makeCard(label, valueHtml, editable, metric) {
+    const editBtn = editable
+      ? `<button class="edit-btn" onclick="openEdit('${metric}','${label}')" title="編集">✏️</button>`
+      : '';
+    return `<div class="card">${editBtn}<div class="label">${label}</div><div class="value">${valueHtml}</div></div>`;
   }
 
   function renderDashboard(idx) {
-    const d = currentData;
     const dash = document.getElementById('dashboard');
+    const urriage = getVal('売上', idx);
+    const shiire  = getVal('仕入', idx);
+    const arari   = getVal('粗利', idx);
+    const mokuhyo = getVal('目標粗利', idx);
+    const sa      = getVal('目標との差', idx);
+    const reach   = getVal('目標達成率', idx);
+    const shutsu  = getVal('出品中', idx);
+    const ureta   = getVal('販売数', idx);
+    const heikin  = getVal('平均売価', idx);
+    const hekiRi  = getVal('平均利益', idx);
+    const kaiten  = getVal('回転率', idx);
+    const rieki   = getVal('利益率', idx);
 
-    const urriage  = getVal('売上', idx);
-    const shiire   = getVal('仕入', idx);
-    const arari    = getVal('粗利', idx);
-    const mokuhyo  = getVal('目標粗利', idx);
-    const sa       = getVal('目標との差', idx);
-    const reach    = getVal('目標達成率', idx);
-    const shutsu   = getVal('出品中', idx);
-    const ureta    = getVal('販売数', idx);
-    const heikin   = getVal('平均売価', idx);
-    const hekiRi   = getVal('平均利益', idx);
-    const kaiten   = getVal('回転率', idx);
-    const rieki    = getVal('利益率', idx);
-
-    // 達成率の数値計算
     let reachNum = 0;
     if (reach !== null && reach !== '') {
       const r = Number(reach);
@@ -260,23 +290,16 @@
     }
     const isAchieved = reachNum >= 100;
     const fillPct = Math.min(reachNum, 100).toFixed(1);
-
-    // 差額の色判定
     const saNum = Number(sa);
     const saClass = saNum >= 0 ? 'positive' : 'negative';
 
     dash.innerHTML = `
       <div class="section-title">今月の売上</div>
       <div class="card-grid">
-        <div class="card">
-          <div class="label">売上</div>
-          <div class="value large">${fmt(urriage)}</div>
-        </div>
-        <div class="card">
-          <div class="label">粗利</div>
-          <div class="value large">${fmt(arari)}</div>
-        </div>
+        ${makeCard('売上', `<span class="large">${fmt(urriage)}</span>`, true, '売上')}
+        ${makeCard('粗利', `<span class="large">${fmt(arari)}</span>`, false, '')}
       </div>
+      ${makeCard('仕入', fmt(shiire), true, '仕入')}
 
       <div class="section-title">目標達成</div>
       <div class="progress-card">
@@ -295,59 +318,38 @@
 
       <div class="section-title">出品状況</div>
       <div class="card-grid">
-        <div class="card">
-          <div class="label">出品中</div>
-          <div class="value">${fmtNum(shutsu)}<span style="font-size:14px;font-weight:400;color:#8e8e93"> 件</span></div>
-        </div>
-        <div class="card">
-          <div class="label">販売数</div>
-          <div class="value">${fmtNum(ureta)}<span style="font-size:14px;font-weight:400;color:#8e8e93"> 件</span></div>
-        </div>
+        ${makeCard('出品中', `${fmtNum(shutsu)}<span style="font-size:13px;font-weight:400;color:#8e8e93"> 件</span>`, true, '出品中')}
+        ${makeCard('販売数', `${fmtNum(ureta)}<span style="font-size:13px;font-weight:400;color:#8e8e93"> 件</span>`, true, '販売数')}
       </div>
 
       <div class="section-title">単価・効率</div>
       <div class="card-grid">
-        <div class="card">
-          <div class="label">平均売価</div>
-          <div class="value" style="font-size:22px">${fmt(heikin)}</div>
-        </div>
-        <div class="card">
-          <div class="label">平均利益</div>
-          <div class="value" style="font-size:22px">${fmt(hekiRi)}</div>
-        </div>
-        <div class="card">
-          <div class="label">利益率</div>
-          <div class="value" style="font-size:22px">${fmtPct(rieki)}</div>
-        </div>
-        <div class="card">
-          <div class="label">回転率</div>
-          <div class="value" style="font-size:22px">${fmtPct(kaiten)}</div>
-        </div>
+        ${makeCard('平均売価', fmt(heikin), true, '平均売価')}
+        ${makeCard('平均利益', fmt(hekiRi), false, '')}
+        ${makeCard('利益率', fmtPct(rieki), false, '')}
+        ${makeCard('回転率', fmtPct(kaiten), false, '')}
       </div>
-      <div style="height:20px"></div>
+      <div style="height:8px"></div>
     `;
   }
 
   function buildTabs() {
     const tabs = document.getElementById('monthTabs');
+    tabs.innerHTML = '';
     months.forEach((m, i) => {
       const btn = document.createElement('button');
       btn.className = 'month-btn' + (i === currentMonthIdx ? ' active' : '');
       btn.textContent = m;
       btn.onclick = () => {
         currentMonthIdx = i;
-        document.querySelectorAll('.month-btn').forEach((b, j) => {
-          b.classList.toggle('active', j === i);
-        });
+        document.querySelectorAll('.month-btn').forEach((b, j) => b.classList.toggle('active', j === i));
         renderDashboard(i);
       };
       tabs.appendChild(btn);
     });
-
-    // 今月タブにスクロール
     setTimeout(() => {
-      const activeBtn = tabs.children[currentMonthIdx];
-      if (activeBtn) activeBtn.scrollIntoView({ inline: 'center', behavior: 'smooth' });
+      const active = tabs.children[currentMonthIdx];
+      if (active) active.scrollIntoView({ inline: 'center', behavior: 'smooth' });
     }, 100);
   }
 
@@ -357,26 +359,72 @@
       if (!res.ok) throw new Error('HTTP ' + res.status);
       const json = await res.json();
       currentData = json.data;
-
       document.getElementById('loading').style.display = 'none';
       document.getElementById('dashboard').style.display = 'block';
-
       buildTabs();
       renderDashboard(currentMonthIdx);
-    } catch (e) {
+    } catch(e) {
       document.getElementById('loading').style.display = 'none';
       document.getElementById('error').style.display = 'block';
-      document.getElementById('errMsg').textContent = e.message;
+      document.getElementById('errMsg').textContent = '⚠️ ' + e.message;
     }
   }
 
-  if (GAS_URL === 'YOUR_GAS_URL_HERE') {
-    document.getElementById('loading').style.display = 'none';
-    document.getElementById('error').style.display = 'block';
-    document.getElementById('errMsg').textContent = 'index.html の GAS_URL を設定してください';
-  } else {
-    loadData();
+  // --- 編集機能 ---
+  function openEdit(metric, label) {
+    editState = { metric, label };
+    const current = getVal(metric, currentMonthIdx);
+    document.getElementById('editTitle').textContent = label + 'を編集';
+    document.getElementById('editSub').textContent = months[currentMonthIdx] + 'の値を入力してください';
+    document.getElementById('editInput').value = current ? Number(current) : '';
+    document.getElementById('saveBtn').disabled = false;
+    document.getElementById('editOverlay').classList.add('open');
+    setTimeout(() => document.getElementById('editInput').focus(), 100);
   }
+
+  function closeEdit(e) {
+    if (e && e.target !== document.getElementById('editOverlay')) return;
+    document.getElementById('editOverlay').classList.remove('open');
+  }
+
+  async function saveEdit() {
+    const val = document.getElementById('editInput').value;
+    if (val === '') return;
+    const btn = document.getElementById('saveBtn');
+    btn.disabled = true;
+    btn.textContent = '保存中...';
+
+    try {
+      await fetch(GAS_URL, {
+        method: 'POST',
+        mode: 'no-cors',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ metric: editState.metric, monthIdx: currentMonthIdx, value: val })
+      });
+
+      // ローカルデータを更新
+      if (currentData[editState.metric]) {
+        currentData[editState.metric][currentMonthIdx] = Number(val);
+      }
+      renderDashboard(currentMonthIdx);
+      document.getElementById('editOverlay').classList.remove('open');
+      showToast('✅ 保存しました');
+    } catch(e) {
+      showToast('❌ 保存に失敗しました');
+    }
+
+    btn.disabled = false;
+    btn.textContent = '保存する';
+  }
+
+  function showToast(msg) {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2500);
+  }
+
+  loadData();
 </script>
 </body>
 </html>

@@ -85,6 +85,7 @@ function getProducts() {
 function doPost(e) {
   try {
     var params = JSON.parse(e.postData.contents);
+    if (params.type === 'products') { return getProducts(); }
     var ss = SpreadsheetApp.getActiveSpreadsheet();
 
     if (params.action === 'updateProduct') {

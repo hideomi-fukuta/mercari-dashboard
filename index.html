@@ -411,7 +411,11 @@ async function saveSummary() {
 async function loadProducts() {
   document.getElementById('prodLoading').style.display = 'block';
   try {
-    const res = await fetch(GAS_URL + '?type=products');
+    const res = await fetch(GAS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ type: 'products' })
+    });
     if (!res.ok) throw new Error('HTTP ' + res.status);
     const json = await res.json();
     if (json.error) throw new Error(json.error);

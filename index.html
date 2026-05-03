@@ -235,6 +235,9 @@
     <h3 id="editProductName"></h3>
     <div class="sub" id="editProductSub"></div>
 
+    <div class="field-label">商品名</div>
+    <input class="field-input" id="editName" type="text" placeholder="商品名を入力...">
+
     <div class="field-label">出品状況</div>
     <div class="status-grid" id="statusGrid"></div>
 
@@ -597,6 +600,7 @@ function openNewProduct() {
   editingProduct = null;
   document.getElementById('editProductName').textContent = '新規仕入れ';
   document.getElementById('editProductSub').textContent = '新しい商品を登録します';
+  document.getElementById('editName').value        = '';
   document.getElementById('editShiire').value     = '';
   document.getElementById('editPrice').value      = '';
   document.getElementById('editShiireSaki').value = '';
@@ -638,6 +642,7 @@ function openProductEdit(rowNum) {
   document.getElementById('editProductName').textContent = col(p,'商品名') || '商品';
   document.getElementById('editProductSub').textContent = col(p,'カテゴリ') || '';
 
+  document.getElementById('editName').value        = col(p,'商品名') || '';
   document.getElementById('editShiire').value     = col(p,'仕入値','仕入れ値','仕入点数') || '';
   document.getElementById('editPrice').value      = col(p,'販売価格') || '';
   document.getElementById('editShiireSaki').value = col(p,'仕入先','仕入れ先') || '';
@@ -675,6 +680,7 @@ function actualCol(p, ...names) {
 async function saveProduct() {
   const p = editingProduct;
   const status   = document.querySelector('.status-opt.selected')?.textContent || '';
+  const nameVal  = document.getElementById('editName').value;
   const shiire   = document.getElementById('editShiire').value;
   const price    = document.getElementById('editPrice').value;
   const sakiVal  = document.getElementById('editShiireSaki').value;
@@ -688,6 +694,7 @@ async function saveProduct() {
   btn.disabled = true; btn.textContent = '保存中...';
 
   const updates = [];
+  if (nameVal !== String(col(p,'商品名'))) updates.push({ field:'商品名', value:nameVal });
   if (status && status !== col(p,'出品状況')) updates.push({ field:actualCol(p,'出品状況'), value:status });
   if (shiire !== '' && shiire !== String(col(p,'仕入値','仕入れ値','仕入点数'))) updates.push({ field:actualCol(p,'仕入値','仕入れ値','仕入点数'), value:Number(shiire) });
   if (price !== '' && price !== String(col(p,'販売価格'))) updates.push({ field:actualCol(p,'販売価格'), value:Number(price) });
@@ -704,6 +711,7 @@ async function saveProduct() {
       // 新規登録
       const fields = {};
       const status = document.querySelector('.status-opt.selected')?.textContent || '検品済';
+      if (nameVal)  fields['商品名']   = nameVal;
       if (status)   fields['出品状況'] = status;
       if (shiire)   fields['仕入値']   = Number(shiire);
       if (price)    fields['販売価格'] = Number(price);

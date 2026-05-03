@@ -88,7 +88,40 @@ function doPost(e) {
     if (params.type === 'products') { return getProducts(); }
     var ss = SpreadsheetApp.getActiveSpreadsheet();
 
-    if (params.action === 'updateProduct') {
+    if (params.action === 'addProduct') {
+      var sheet = ss.getSheetByName('商品管理表');
+      var data = sheet.getDataRange().getValues();
+
+      // ヘッダー行を探す
+      var headerRowIdx = -1;
+      for (var i = 0; i < data.length; i++) {
+        for (var j = 0; j < data[i].length; j++) {
+          if (String(data[i][j]).trim() === '商品名' || String(data[i][j]).trim() === '管理番号') { headerRowIdx = i; break; }
+        }
+        if (headerRowIdx !== -1) break;
+      }
+      var headers = data[headerRowIdx].map(function(h) { return String(h).trim(); });
+
+      // 管理番号の最大値を取得
+      var numIdx = headers.indexOf('管理番号');
+      var maxNum = 0;
+      for (var i = headerRowIdx + 1; i < data.length; i++) {
+        var n = Number(data[i][numIdx]);
+        if (!isNaN(n) && n > maxNum) maxNum = n;
+      }
+
+      // 新しい行を作成
+      var newRow = new Array(headers.length).fill('');
+      var fieldMap = params.fields; // { '商品名': '...', '仕入値': 1000, ... }
+      Object.keys(fieldMap).forEach(function(key) {
+        var idx = headers.indexOf(key);
+        if (idx !== -1) newRow[idx] = fieldMap[key];
+      });
+      if (numIdx !== -1) newRow[numIdx] = maxNum + 1;
+
+      sheet.appendRow(newRow);
+
+    } else if (params.action === 'updateProduct') {
       // 商品管理表のセルを更新
       var sheet = ss.getSheetByName('商品管理表');
       var data = sheet.getDataRange().getValues();

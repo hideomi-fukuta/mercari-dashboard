@@ -179,6 +179,14 @@
 
     #prodLoading{text-align:center;padding:40px;color:#8e8e93;font-size:13px;}
     .empty{text-align:center;padding:40px;color:#8e8e93;font-size:14px;}
+    .fab{
+      position:fixed;bottom:calc(env(safe-area-inset-bottom) + 70px);right:20px;
+      background:#FF0211;color:white;border:none;border-radius:50px;
+      padding:14px 20px;font-size:15px;font-weight:700;
+      box-shadow:0 4px 12px rgba(255,2,17,0.4);cursor:pointer;
+      display:none;z-index:15;
+    }
+    .fab.visible{display:block;}
   </style>
 </head>
 <body>
@@ -279,6 +287,9 @@
   </div>
 </div>
 
+<!-- 新規仕入れボタン -->
+<button class="fab" id="fabBtn" onclick="openNewProduct()">＋ 新規仕入れ</button>
+
 <!-- サマリー編集シート -->
 <div class="overlay" id="summaryEditOverlay" onclick="closeOverlay(event,'summaryEditOverlay')">
   <div class="sheet">
@@ -307,6 +318,7 @@ let headerRow = null;
 let currentMonthIdx = new Date().getMonth();
 let currentView = 'dash';
 let editingProduct = null;
+let isNewProduct = false;
 let sEditState = {};
 let activeFilter = '全て';
 
@@ -318,6 +330,7 @@ function switchView(view) {
   document.getElementById('navDash').classList.toggle('active', view === 'dash');
   document.getElementById('navProducts').classList.toggle('active', view === 'products');
   document.getElementById('monthTabs').style.display = view === 'dash' ? 'flex' : 'none';
+  document.getElementById('fabBtn').classList.toggle('visible', view === 'products');
   if (view === 'products' && !productData) loadProducts();
 }
 
@@ -574,6 +587,28 @@ function renderProducts(list) {
   }).join('');
 }
 
+function openNewProduct() {
+  isNewProduct = true;
+  editingProduct = null;
+  document.getElementById('editProductName').textContent = '新規仕入れ';
+  document.getElementById('editProductSub').textContent = '新しい商品を登録します';
+  document.getElementById('editShiire').value     = '';
+  document.getElementById('editPrice').value      = '';
+  document.getElementById('editShiireSaki').value = '';
+  document.getElementById('editFee').value        = '';
+  document.getElementById('editShipping').value   = '';
+  document.getElementById('editShiireDate').value = new Date().toISOString().slice(0,10);
+  document.getElementById('editListDate').value   = '';
+  document.getElementById('editSoldDate').value   = '';
+  document.getElementById('editMemo').value       = '';
+  document.getElementById('statusGrid').innerHTML = STATUS_LIST.map(s =>
+    `<div class="status-opt ${s==='検品済'?'selected':''}" onclick="selectStatus(this,'${s}')">${s}</div>`
+  ).join('');
+  document.getElementById('saveProductBtn').disabled = false;
+  document.getElementById('saveProductBtn').textContent = '登録する';
+  document.getElementById('editOverlay').classList.add('open');
+}
+
 // 日付変換: "2025/5/16" → "2025-05-16"
 function toInputDate(v) {
   if (!v) return '';
@@ -613,6 +648,7 @@ function openProductEdit(rowNum) {
     `<div class="status-opt ${s===cur?'selected':''}" onclick="selectStatus(this,'${s}')">${s}</div>`
   ).join('');
 
+  isNewProduct = false;
   document.getElementById('saveProductBtn').disabled = false;
   document.getElementById('saveProductBtn').textContent = '保存する';
   document.getElementById('editOverlay').classList.add('open');
@@ -660,22 +696,48 @@ async function saveProduct() {
   if (memo !== String(col(p,'備考'))) updates.push({ field:actualCol(p,'備考'), value:memo });
 
   try {
-    for (const u of updates) {
+    if (isNewProduct) {
+      // 新規登録
+      const fields = {};
+      const status = document.querySelector('.status-opt.selected')?.textContent || '検品済';
+      if (status)   fields['出品状況'] = status;
+      if (shiire)   fields['仕入値']   = Number(shiire);
+      if (price)    fields['販売価格'] = Number(price);
+      if (sakiVal)  fields['仕入先']   = sakiVal;
+      if (fee)      fields['手数料']   = Number(fee);
+      if (shipping) fields['送料']     = Number(shipping);
+      if (shiireD)  fields['仕入日']   = shiireD;
+      if (listD)    fields['出品日']   = listD;
+      if (soldD)    fields['売出日']   = soldD;
+      if (memo)     fields['備考']     = memo;
       await fetch(GAS_URL, {
         method:'POST', mode:'no-cors',
         headers:{'Content-Type':'application/json'},
-        body: JSON.stringify({ action:'updateProduct', row:p._row, headerRow:headerRow, field:u.field, value:u.value })
+        body: JSON.stringify({ action:'addProduct', fields })
       });
-      p[u.field] = u.value;
+      document.getElementById('editOverlay').classList.remove('open');
+      showToast('✅ 登録しました！リストを更新します');
+      productData = null;
+      loadProducts();
+    } else {
+      // 既存更新
+      for (const u of updates) {
+        await fetch(GAS_URL, {
+          method:'POST', mode:'no-cors',
+          headers:{'Content-Type':'application/json'},
+          body: JSON.stringify({ action:'updateProduct', row:p._row, headerRow:headerRow, field:u.field, value:u.value })
+        });
+        p[u.field] = u.value;
+      }
+      renderProducts(productData.filter(x => {
+        const q = document.getElementById('searchInput').value.toLowerCase();
+        const matchQ = !q || String(col(x,'商品名')).toLowerCase().includes(q);
+        const matchF = activeFilter === '全て' || derivedStatus(x) === activeFilter;
+        return matchQ && matchF;
+      }));
+      document.getElementById('editOverlay').classList.remove('open');
+      showToast(updates.length ? '✅ 保存しました' : '変更なし');
     }
-    renderProducts(productData.filter(x => {
-      const q = document.getElementById('searchInput').value.toLowerCase();
-      const matchQ = !q || String(col(x,'商品名')).toLowerCase().includes(q);
-      const matchF = activeFilter === '全て' || col(x,'出品状況') === activeFilter;
-      return matchQ && matchF;
-    }));
-    document.getElementById('editOverlay').classList.remove('open');
-    showToast(updates.length ? '✅ 保存しました' : '変更なし');
   } catch(e) { showToast('❌ ' + e.message); }
   btn.disabled = false; btn.textContent = '保存する';
 }
